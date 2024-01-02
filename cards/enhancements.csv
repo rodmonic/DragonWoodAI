@@ -1,0 +1,10 @@
+﻿name,strike,stomp,scream,modify_attribute,modifier,permanent
+Lightening Bolt,7,5,7,"[""strike_modifier"", ""stomp_modifier"", ""scream_modifier""]",4,FALSE
+Bucket of Spinach,7,10,8,"[""stomp_modifier""]",2,TRUE
+Ghost Disguise,8,7,10,"[""stomp_modifier""]",2,TRUE
+Cloak of Darkness,11,9,11,"[""strike_modifier"", ""stomp_modifier"", ""scream_modifier""]",2,TRUE
+Magical Unicorn,8,6,8,"[""strike_modifier"", ""stomp_modifier"", ""scream_modifier""]",1,TRUE
+Silver Sword,10,6,7,"[""stomp_modifier""]",2,TRUE
+Friendly Bunny,4,4,4,"[""dice_modifier""]",1,FALSE
+Lucky Mushroom,7,5,7,"[""reroll""]",1,FALSE
+Charmed Potion,5,4,5,"[""adevnturer_modifier""]",1,FALSE

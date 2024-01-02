@@ -1,2 +1,2 @@
 # DragonWoodAI
-Can I Get Dragon Wood to Play AI
+Can I get AI to play Dragon Wood?
