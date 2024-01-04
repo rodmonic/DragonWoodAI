@@ -1,14 +1,16 @@
 from typing import List
-import random
 import ast
+import itertools
 from collections import Counter
 import csv
 import logging
 logging.basicConfig(filename='dragonwood.log', encoding='utf-8', level=logging.DEBUG, )
-random.seed(100)
+import random
 
 
-class Dice:
+
+class Dice():
+
     def __init__(self, values: list):
         self.values = values
         self.EV = 0
@@ -26,14 +28,13 @@ class Dice:
 
 class Deck:
     def __init__(self):
-        self.random = random
         self.cards = []
         self.discard = []
 
-    def shuffle(self):
-        self.random.shuffle(self.cards)
 
-    # deal n cards from the deck
+    def shuffle(self):
+        random.shuffle(self.cards)
+
     def deal(self, n: int):
         cards_delt = []
         for _ in range(n):
@@ -184,40 +185,44 @@ class Player():
         return strikes, stomps, screams
 
     def find_strikes(self):
-        sorted_hand = sorted(self.hand, key=lambda card: (card.suit, card.value))
+        sorted_hand = sorted(self.hand, key=lambda card: (card.value))
         max_length = 1
-        end_index = 1
+        end_index = 0
+        count = 0
 
-        for suit in range(5):
-            suit_strikes = [card for card in sorted_hand if card.suit == suit]
+        consecutive_pairs = zip(sorted_hand, sorted_hand[1:])
 
-            count = 1
-            consecutive_pairs = zip(suit_strikes, suit_strikes[1:])
+        for current_card, next_card in consecutive_pairs:
+            if current_card.value + 1 == next_card.value:
+                count += 1
+                max_length = max(max_length, count)
+                end_index = sorted_hand.index(next_card)
 
-            for current_card, next_card in consecutive_pairs:
-                if current_card.value + 1 == next_card.value:
-                    count += 1
-                    max_length = max(max_length, count)
-                    end_index = sorted_hand.index(next_card)
+            else:
+                count = 1
 
-                else:
-                    count = 1
+        adventurers = sorted_hand[end_index-max_length+1: end_index+1]
 
-        adventurers = sorted_hand[end_index-max_length: end_index]
-
-        return adventurers
+        # finally return all smaller lists within choices list
+        return [adventurers[0:x+1] for x in range(len(adventurers))]
 
     def find_stomps(self):
         element_counts = Counter(x.value for x in self.hand)
         max_element, max_count = max(element_counts.items(), key=lambda x: x[1])
         adventurers = [x for x in self.hand if x.value == max_element]
-        return adventurers
+
+        # finally return all smaller lists within choices list
+        return [adventurers[0:x+1] for x in range(len(adventurers))]
+
 
     def find_screams(self):
         element_counts = Counter(x.suit for x in self.hand)
         max_element, max_count = max(element_counts.items(), key=lambda x: x[0])
         adventurers = [x for x in self.hand if x.suit == max_element]
-        return adventurers
+        
+        # finally return all smaller lists within choices list
+        return [adventurers[0:x+1] for x in range(len(adventurers))]
+
 
     def decide(self, landscape):
         decision = {}
@@ -227,27 +232,36 @@ class Player():
             return decision
 
         self.choices = self.find_choices()
+
         options = []
 
         for index, card in enumerate(landscape):
             # Extracting strike, stomp, and scream values from the current card
             strike_value, stomp_value, scream_value = card.strike, card.stomp, card.scream
 
-            # Calculate the adjusted values based on choices and EV
-            strike_threshold = len(self.choices[0]) * self.adjusted_EV
-            stomp_threshold = len(self.choices[1]) * self.adjusted_EV
-            scream_threshold = len(self.choices[2]) * self.adjusted_EV
+            strike_options = []
+            for strike in self.choices[0]:
+                strike_threshold = len(strike) * self.adjusted_EV
+                if strike_threshold > strike_value:
+                    strike_options.append(["strike", card, strike, strike_threshold - strike_value, index])
 
-            # Check if the adjusted value is greater than the card's value
-            if strike_threshold > strike_value:
-                options.append(["strike", card, self.choices[0], strike_threshold - strike_value, index])
-            if stomp_threshold > stomp_value:
-                options.append(["stomp", card, self.choices[1], stomp_threshold - stomp_value, index])
-            if scream_threshold > scream_value:
-                options.append(["scream", card, self.choices[2], scream_threshold - scream_value, index])
+            # add to options the option with the smallest non negative difference between threshold and value
+            if strike_options:  
+                options.append(min([x for x in strike_options if x[3] >=0], key=lambda x: x[3]))
+
+
+            for stomp in self.choices[1]:
+                stomp_threshold = len(stomp) * self.adjusted_EV
+                if stomp_threshold > stomp_value:
+                    options.append(["stomp", card, stomp, stomp_threshold - stomp_value, index])
+
+            for scream in self.choices[2]:
+                scream_threshold = len(scream) * self.adjusted_EV
+                if scream_threshold > scream_value:
+                    options.append(["scream", card, scream, scream_threshold - scream_value, index])            
 
         if options:
-            # Use key=lambda x: x[3] to get the element with the highest difference
+            # Use key=lambda x: x[3] to get the element with the smallest positive difference
             max_element = max(options, key=lambda x: x[3])
             decision["decision"] = max_element[0]  # strike/stomp/scream
             decision["card"] = max_element[4]  # the card index within the landscape
@@ -270,16 +284,18 @@ class Game():
         self.dragonwood_deck = dragonwood_deck
         self.players = players
         self.turns = 0
+        self.winner = ''
         self.landscape = []
         self.initial_deal_adventurer()
         self.initial_deal_landscape()
-        self.random = random
+        random.seed()
 
     def report(self):
-        scores = []
+        scores = [self.winner]
         for player in self.players:
-            scores.append([player.name, player.points])
-        print(f'Game Finished:{scores} - {self.turns} turns')
+            scores.extend([player.name, player.points, player.adjusted_EV, player.scream_modifier, player.strike_modifier, player.stomp_modifier])
+        
+        return scores
 
     def __repr__(self) -> str:
         return f'Game({len(self.players)} players)'
@@ -311,16 +327,14 @@ class Game():
     def failure(self, player, decision):
         player.discard_card(self.adventurer_deck)
 
-    def play(self):
-
+    def play(self, seed: int=None):
+        
         logging.debug('start')
 
         while self.landscape:
             self.turns += 1
             for player in self.players:
                 decision = player.decide(self.landscape)
-
-                logging.debug(f'Turn {self.turns} {player.name}-{player.points}-{player.hand}-{self.landscape}')
 
                 if decision["decision"] == "reload":
                     player.hand.extend(self.adventurer_deck.deal(1))
@@ -329,10 +343,16 @@ class Game():
                     modifiers = getattr(player, decision["decision"] + "_modifier")
 
                     if dice_roll + modifiers >= getattr(self.landscape[decision["card"]], decision["decision"]):
-                        logging.debug(f'Turn {self.turns} {player.name}-{player.points}-{player.hand}-{self.landscape}-{decision["decision"]}-{decision["adventurers"]}-{self.landscape[decision["card"]]}-SUCCESS')
+                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{self.landscape[decision["card"]]}-SUCCESS')
                         self.success(player, decision)
                     else:
-                        logging.debug(f'Turn {self.turns} {player.name}-{player.points}-{player.hand}-{self.landscape}-{decision["decision"]}-{decision["adventurers"]}-{self.landscape[decision["card"]]}-FAILURE')
+                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{self.landscape[decision["card"]]}-FAILURE')
                         self.failure(player, decision)
+        
+        players_scores =[(player.name, player.points) for player in self.players]
+        
+        self.winner, _ = max(players_scores, key=lambda x: x[1])
 
-        self.report()
+        return self.report()
+
+
