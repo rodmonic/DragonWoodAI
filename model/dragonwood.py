@@ -175,7 +175,7 @@ class Player():
 
     def find_choices(self):
 
-        # strike - finding suited straights
+        # strike - finding straights
         strikes = self.find_strikes()
         # stomp - finding duplicate values
         stomps = self.find_stomps()
@@ -237,28 +237,18 @@ class Player():
 
         for index, card in enumerate(landscape):
             # Extracting strike, stomp, and scream values from the current card
-            strike_value, stomp_value, scream_value = card.strike, card.stomp, card.scream
+            values = card.strike, card.stomp, card.scream
+            names = "strike", "stomp", "scream"
 
-            strike_options = []
-            for strike in self.choices[0]:
-                strike_threshold = len(strike) * self.adjusted_EV
-                if strike_threshold > strike_value:
-                    strike_options.append(["strike", card, strike, strike_threshold - strike_value, index])
+            for i, choice in enumerate(self.choices):
+                pre_options = []
+                for option in choice:
+                    threshold = len(option) * self.adjusted_EV + getattr(self, f'{names[i]}_modifier')
+                    if threshold > values[i]:
+                        pre_options.append([names[i], card, option, threshold - values[i], index])
 
-            # add to options the option with the smallest non negative difference between threshold and value
-            if strike_options:  
-                options.append(min([x for x in strike_options if x[3] >=0], key=lambda x: x[3]))
-
-
-            for stomp in self.choices[1]:
-                stomp_threshold = len(stomp) * self.adjusted_EV
-                if stomp_threshold > stomp_value:
-                    options.append(["stomp", card, stomp, stomp_threshold - stomp_value, index])
-
-            for scream in self.choices[2]:
-                scream_threshold = len(scream) * self.adjusted_EV
-                if scream_threshold > scream_value:
-                    options.append(["scream", card, scream, scream_threshold - scream_value, index])            
+                if pre_options:
+                    options.append(min([x for x in pre_options if x[3] >=0], key=lambda x: x[3]))          
 
         if options:
             # Use key=lambda x: x[3] to get the element with the smallest positive difference
@@ -293,8 +283,14 @@ class Game():
     def report(self):
         scores = [self.winner]
         for player in self.players:
-            scores.extend([player.name, player.points, player.adjusted_EV, player.scream_modifier, player.strike_modifier, player.stomp_modifier])
-        
+            scores.extend([
+                player.name, 
+                player.points, 
+                player.adjusted_EV, 
+                player.scream_modifier, 
+                player.strike_modifier,
+                player.stomp_modifier
+                ])
         return scores
 
     def __repr__(self) -> str:
@@ -317,7 +313,8 @@ class Game():
             player.points += self.landscape[decision["card"]].points
         elif type(dw_card) is Enhancement:
             for modification in dw_card.modifications:
-                setattr(player, modification, dw_card.modifier)
+                current_value = getattr(player, modification)
+                setattr(player, modification, dw_card.modifier + current_value)
 
         del self.landscape[decision["card"]]
         self.landscape.extend(self.dragonwood_deck.deal(1))
@@ -342,7 +339,7 @@ class Game():
                     dice_roll = player.dice.roll_n_dice(len(decision["adventurers"]))
                     modifiers = getattr(player, decision["decision"] + "_modifier")
 
-                    if dice_roll + modifiers >= getattr(self.landscape[decision["card"]], decision["decision"]):
+                    if (dice_roll + modifiers) >= getattr(self.landscape[decision["card"]], decision["decision"]):
                         logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{self.landscape[decision["card"]]}-SUCCESS')
                         self.success(player, decision)
                     else:
