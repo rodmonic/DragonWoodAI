@@ -1,17 +1,17 @@
-﻿name,points,strike,stomp,scream,number of
-Grumpy Troll,4,9,11,9,1
-Giggling Goblin,2,7,5,5,2
-Hungry Bear,3,7,6,9,2
-Pack Of Wolves,3,6,7,9,2
-Fierce Jaguar,3,8,6,8,2
-Gigantic Python,4,11,8,10,1
-Wasps' Nest,2,5,6,7,2
-Angry Ogre,5,12,9,14,1
-Crazy Bats,1,4,3,3,4
-Gooey Glob,5,14,9,10,1
-Spooky Spiders,1,3,3,4,4
-Fire Ants,2,7,4,6,2
-Secret Shadow,4,10,8,11,1
-Blue Dragon,6,13,10,13,1
-Orange Dragon,7,15,11,12,1
-Wild Boar,3,8,7,7,1
+﻿name,points,strike,stomp,scream,number of,game_ender
+Grumpy Troll,4,9,11,9,2,0
+Giggling Goblin,2,7,5,5,2,0
+Hungry Bear,3,7,6,9,2,0
+Pack Of Wolves,3,6,7,9,2,0
+Fierce Jaguar,3,8,6,8,2,0
+Gigantic Python,4,11,8,10,2,0
+Wasps' Nest,2,5,6,7,2,0
+Angry Ogre,5,12,9,14,2,0
+Crazy Bats,1,4,3,3,4,0
+Gooey Glob,5,14,9,10,2,0
+Spooky Spiders,1,3,3,4,4,0
+Fire Ants,2,7,4,6,2,0
+Secret Shadow,4,10,8,11,2,0
+Blue Dragon,6,13,10,13,1,1
+Orange Dragon,7,15,11,12,1,1
+Wild Boar,3,8,7,7,2,0

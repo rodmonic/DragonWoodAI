@@ -4,9 +4,9 @@ import itertools
 from collections import Counter
 import csv
 import logging
-logging.basicConfig(filename='dragonwood.log', encoding='utf-8', level=logging.DEBUG, )
 import random
 
+logging.basicConfig(filename='dragonwood.log', encoding='utf-8', level=logging.DEBUG)
 
 
 class Dice():
@@ -31,7 +31,6 @@ class Deck:
         self.cards = []
         self.discard = []
 
-
     def shuffle(self):
         random.shuffle(self.cards)
 
@@ -41,8 +40,9 @@ class Deck:
 
             if not self.cards and type(self) is Adventurer_Deck:
                 self.cards = self.discard
-                self.discard = []
+                self.discard= []
                 self.shuffle()
+                self.number_of_deals += 1
 
             if self.cards:
                 cards_delt.extend(self.cards[:1])
@@ -61,14 +61,18 @@ class Card():
         self.name = name
 
 
+
 class Creature(Card):
-    def __init__(self, points: int, strike: int, stomp: int, scream: int, name: str) -> None:
+    def __init__(self, points: int, strike: int, stomp: int, scream: int, name: str, game_ender: bool) -> None:
         Card.__init__(self, strike, stomp, scream, name)
         self.points = points
+        self.game_ender = game_ender
 
-    def __repr__(self):
-        return f'C:{self.name}:{self.points}({self.strike},{self.stomp},{self.scream})'
+    def __str__(self):
+        return f'C:{self.name}:{self.points}:{self.strike}:{self.stomp}:{self.scream}'
 
+    def __repr__(self) -> str:
+        return f'C:{self.name}:{self.points}:{self.strike}:{self.stomp}:{self.scream}'
 
 class Enhancement(Card):
     def __init__(self, strike: int, stomp: int, scream: int, name: str, modifications: list[object], modifier: int, permanent: bool) -> None:
@@ -77,8 +81,11 @@ class Enhancement(Card):
         self.modifier = modifier
         self.permanent = permanent
 
-    def __repr__(self):
-        return f'E:{self.name}({self.strike},{self.stomp},{self.scream})'
+    def __str__(self):
+        return f'E:{self.name}::{self.strike}:{self.stomp}:{self.scream}'
+
+    def __repr__(self) -> str:
+        return f'E:{self.name}::{self.strike}:{self.stomp}:{self.scream}'
 
 
 class Dragonwood_Deck(Deck):
@@ -104,7 +111,8 @@ class Dragonwood_Deck(Deck):
                             points=int(creature[1]),
                             strike=int(creature[2]),
                             stomp=int(creature[3]),
-                            scream=int(creature[4])
+                            scream=int(creature[4]),
+                            game_ender=int(creature[6])
                             )
                         )
 
@@ -136,9 +144,11 @@ class Adventurer():
         self.value = value
         self.suit = suit
 
-    def __repr__(self):
+    def __str__(self):
         return f'Adventurer({self.suit}:{self.value})'
 
+    def __repr__(self) -> str:
+        return f'Adventurer({self.suit}:{self.value})'
 
 class Adventurer_Deck(Deck):
     def __init__(self, suits: int, values: int):
@@ -146,24 +156,21 @@ class Adventurer_Deck(Deck):
         self.generate_adventurer_deck(suits, values)
         self.suits = max(self.cards, key=lambda card: card.suit)
         self.shuffle()
+        self.number_of_deals = 1
 
     def generate_adventurer_deck(self, suits, values):
-        # adverenturer cards
+        # adventurer cards
         self.cards = [
             Adventurer(i, j)
             for i in range(0, suits)
             for j in range(0, values)
             ]
-        # # lucky ladybird cards
-        # for _ in range(0,4):
-        #     self.cards.append(Adventurer(0,0))
 
 
 class Player():
 
     def __init__(self, risk_level: float, dice: Dice, name: str):
         self.hand = []
-        self.choices = []
         self.name = name
         self.adjusted_EV = risk_level + dice.EV
         self.dice = dice
@@ -200,7 +207,8 @@ class Player():
 
             else:
                 count = 1
-
+        #if max_length > 1:
+                
         adventurers = sorted_hand[end_index-max_length+1: end_index+1]
 
         # finally return all smaller lists within choices list
@@ -214,7 +222,6 @@ class Player():
         # finally return all smaller lists within choices list
         return [adventurers[0:x+1] for x in range(len(adventurers))]
 
-
     def find_screams(self):
         element_counts = Counter(x.suit for x in self.hand)
         max_element, max_count = max(element_counts.items(), key=lambda x: x[0])
@@ -223,7 +230,6 @@ class Player():
         # finally return all smaller lists within choices list
         return [adventurers[0:x+1] for x in range(len(adventurers))]
 
-
     def decide(self, landscape):
         decision = {}
 
@@ -231,31 +237,31 @@ class Player():
             decision["decision"] = "reload"
             return decision
 
-        self.choices = self.find_choices()
+        choices = self.find_choices()
 
-        options = []
+        names = "strike", "stomp", "scream"
+        candidate_decisions = []
 
         for index, card in enumerate(landscape):
             # Extracting strike, stomp, and scream values from the current card
             values = card.strike, card.stomp, card.scream
-            names = "strike", "stomp", "scream"
 
-            for i, choice in enumerate(self.choices):
-                pre_options = []
+            for i, choice in enumerate(choices):
+                all_decisions = []
                 for option in choice:
-                    threshold = len(option) * self.adjusted_EV + getattr(self, f'{names[i]}_modifier')
+                    threshold = len(option) * self.adjusted_EV + getattr(self, f'{names[i]}_modifier')+0.1
                     if threshold > values[i]:
-                        pre_options.append([names[i], card, option, threshold - values[i], index])
+                        all_decisions.append([names[i], card, option, threshold - values[i], index])
 
-                if pre_options:
-                    options.append(min([x for x in pre_options if x[3] >=0], key=lambda x: x[3]))          
+                if all_decisions:
+                    candidate_decisions.append(min([x for x in all_decisions if x[3] >=0], key=lambda x: x[3]))          
 
-        if options:
+        if candidate_decisions:
             # Use key=lambda x: x[3] to get the element with the smallest positive difference
-            max_element = max(options, key=lambda x: x[3])
-            decision["decision"] = max_element[0]  # strike/stomp/scream
-            decision["card"] = max_element[4]  # the card index within the landscape
-            decision["adventurers"] = max_element[2]  # the adventurers used
+            selected_option = min(candidate_decisions, key=lambda x: x[3])
+            decision["decision"] = selected_option[0]  # strike/stomp/scream
+            decision["card"] = selected_option[4]  # the card index within the landscape
+            decision["adventurers"] = selected_option[2]  # the adventurers used
 
         else:
             decision["decision"] = "reload"
@@ -263,41 +269,69 @@ class Player():
         return decision
 
     def discard_card(self, adventurer_deck):
+        
+        self.choices = self.find_choices()
+        # find all cards in choices
+        choices_cards = set([a for c in self.choices for b in c for a in b])
+        potential_cards = [(i, x) for i, x in enumerate(self.hand) if x not in choices_cards]
 
-        adventurer_deck.discard.append(self.hand[0])
-        del self.hand[0]
+        if potential_cards:
+            adventurer_deck.discard.append(potential_cards[0][1])
+            del self.hand[potential_cards[0][0]]
+        else:
+            adventurer_deck.discard.append(self.hand[0])
+            del self.hand[0]
+        
 
 
 class Game():
-    def __init__(self, adventurer_deck: Adventurer_Deck, dragonwood_deck: Dragonwood_Deck, players: List[Player]):
+    def __init__(self, adventurer_deck: Adventurer_Deck, dragonwood_deck: Dragonwood_Deck, players: List[Player], hand_length: int):
         self.adventurer_deck = adventurer_deck
         self.dragonwood_deck = dragonwood_deck
         self.players = players
         self.turns = 0
         self.winner = ''
         self.landscape = []
-        self.initial_deal_adventurer()
+        self.initial_deal_adventurer(hand_length)
         self.initial_deal_landscape()
         random.seed()
+        self.game_detail = []
 
     def report(self):
-        scores = [self.winner]
+
+        report_dict = {}
+
+        report_dict["winner"] = self.winner
+        report_dict["game_detail"] = self.game_detail
+        report_dict["turns"] = self.turns
+
+        player_detail = []
+
         for player in self.players:
-            scores.extend([
-                player.name, 
-                player.points, 
-                player.adjusted_EV, 
-                player.scream_modifier, 
-                player.strike_modifier,
-                player.stomp_modifier
-                ])
-        return scores
+            player_detail.append({
+                "name": player.name, 
+                "points": player.points, 
+                "adjusted_ev": player.adjusted_EV, 
+                "scream_modifier": player.scream_modifier, 
+                "strike_modifier": player.strike_modifier,
+                "stomp_modifier": player.stomp_modifier,
+                "final_hand": [str(x) for x in player.dw_cards],
+                "winner": player.name==self.winner
+            })
+
+        report_dict["player_detail"] = player_detail
+        
+        return report_dict
 
     def __repr__(self) -> str:
         return f'Game({len(self.players)} players)'
 
-    def initial_deal_adventurer(self):
-        for _ in range(5):
+    def initial_deal_adventurer(self, hand_length):
+
+        for player in self.players:
+            player.hand = []
+        
+        for _ in range(hand_length):
             for player in self.players:
                 player.hand.extend(self.adventurer_deck.deal(1))
 
@@ -321,35 +355,89 @@ class Game():
         player.hand = [x for x in player.hand if x not in decision["adventurers"]]
         self.adventurer_deck.discard.extend(decision["adventurers"])
 
-    def failure(self, player, decision):
+    def failure(self, player):
         player.discard_card(self.adventurer_deck)
 
-    def play(self, seed: int=None):
-        
-        logging.debug('start')
+    def play(self, debug: bool = False):
 
-        while self.landscape:
+        # Shuffle players
+        random.shuffle(self.players)
+
+        if not debug:
+            logging.disable()
+        logging.debug('start')
+        
+        while True:
+
             self.turns += 1
+            order = 1
             for player in self.players:
+
                 decision = player.decide(self.landscape)
 
+                decision_detail = {}
+
                 if decision["decision"] == "reload":
+                    decision_detail = {
+                        "turn": self.turns,
+                        "order": order,
+                        "player": player.name,
+                        "selected adventure cards": "",
+                        "selected dragonwood card": "",
+                        "decision": decision["decision"],
+                        "dice roll": "",
+                        "outcome": "RELOAD"
+                    }
                     player.hand.extend(self.adventurer_deck.deal(1))
+                    logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
                 else:
                     dice_roll = player.dice.roll_n_dice(len(decision["adventurers"]))
                     modifiers = getattr(player, decision["decision"] + "_modifier")
 
                     if (dice_roll + modifiers) >= getattr(self.landscape[decision["card"]], decision["decision"]):
-                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{self.landscape[decision["card"]]}-SUCCESS')
+                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card"]]}-SUCCESS')
+                        decision_detail = {
+                            "turn": self.turns,
+                            "order": order,
+                            "player": player.name,
+                            "selected dragonwood card": str(self.landscape[decision["card"]]),
+                            "decision": decision["decision"],
+                            "dice roll": dice_roll,
+                            "outcome": "SUCCESS"
+                        }
+        
                         self.success(player, decision)
                     else:
-                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{self.landscape[decision["card"]]}-FAILURE')
-                        self.failure(player, decision)
+                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card"]]}-FAILURE')
+                        decision_detail = {
+                            "turn": self.turns,
+                            "order": order,
+                            "player": player.name,
+                            "selected dragonwood card": str(self.landscape[decision["card"]]),
+                            "decision": decision["decision"],
+                            "dice roll": dice_roll,
+                            "outcome": "FAILURE"
+                        }
+
+                        self.failure(player)
+                order +=1
+
+
+                if len(player.hand) >9:
+                    player.discard_card(self.adventurer_deck)
+
+                decision_detail["points"] = player.points
+                self.game_detail.append(decision_detail)
+
+
+            # check if all the game ending cards have been captured and if so then break while loop
+            remaining_DW_cards = itertools.chain(self.dragonwood_deck.cards, self.landscape)
+            game_ending_cards = sum([x.game_ender for x in remaining_DW_cards if type(x) is Creature])
+            if not game_ending_cards or self.adventurer_deck.number_of_deals > 3:
+                break
         
         players_scores =[(player.name, player.points) for player in self.players]
         
         self.winner, _ = max(players_scores, key=lambda x: x[1])
-
-        return self.report()
 
 
