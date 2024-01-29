@@ -1,9 +1,8 @@
 import model.dragonwood as dw
-import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import json
 import csv
+from more_itertools import powerset
 
 
 column_headers = ["winner", 
@@ -24,8 +23,7 @@ def model_hands(iterations: int):
         hands = []
         adventurer_deck = dw.Adventurer_Deck(5, 12)
         dice = dw.Dice([1, 2, 2, 3, 3, 4])
-        player = dw.Player(0.5, dice, "Alice")
-
+        player = dw.Player(0.5,0.5, dice, "Alice")
 
         for i in tqdm(range(5,10)):
             for j in tqdm(range(iterations)):
@@ -75,32 +73,73 @@ def model_dice(iterations: int) -> None:
 
 def model_games(iterations):
 
-    results = []
-        
-    for i in tqdm(range(iterations)):
-
-        adventurer_deck = dw.Adventurer_Deck(5, 12)
-        dragonwood_deck = dw.Dragonwood_Deck('./cards/creatures.csv', './cards/enhancements.csv')
-        dice = dw.Dice([1, 2, 2, 3, 3, 4])
-        players = [dw.Player(0, dice, "Alice"),
-                    dw.Player(0, dice, "Bob"),
-                    dw.Player(0, dice, "Charles"),
-                    dw.Player(0, dice, "Dylan")
-                    ]
-        game = dw.Game(adventurer_deck, dragonwood_deck, players, 5)
-        game.play(False)
-        report = game.report()
-        result = {
-            "game": i,
-            "winner": report["winner"],
-            "turns": report["turns"],
-            "game_detail": report["game_detail"],
-            "player_detail": report["player_detail"]
-        }
-        results.append(result)
+    games = [["game uuid",
+             "winner",
+             "turns",
+             "mask"
+    ]]
     
-    with open('result.json', 'w') as fp:
-        json.dump(results, fp, indent=4)
+    decisions = []
+    player_details = []
+
+    enhancement_mask = [
+        "Bucket of Spinach",
+        "Ghost Disguise",
+        "Cloak of Darkness",
+        "Magical Unicorn",
+        "Silver Sword"
+        ]
+
+    enhancement_mask_powerset = powerset(enhancement_mask)
+
+
+    for mask in tqdm(enhancement_mask_powerset):
+        for _ in tqdm(range(iterations)):
+
+            adventurer_deck = dw.Adventurer_Deck(5, 12)
+            dragonwood_deck = dw.Dragonwood_Deck('./cards/creatures.csv', './cards/enhancements.csv')
+            dice = dw.Dice([1, 2, 2, 3, 3, 4])
+            players = [dw.Player(0.5, -0.1, dice, "Alice", mask),
+                        dw.Player(0.5, -0.1, dice, "Bob", []),
+                        dw.Player(0.5, -0.1, dice, "Charles", []),
+                        dw.Player(0.5, -0.1, dice, "Dylan", [])
+                        ]
+            game = dw.Game(adventurer_deck, dragonwood_deck, players, 5)
+            game.play(False)
+            game.report()
+            games.append([
+                game.uuid,
+                game.winner,
+                game.turns,
+                mask
+            ])
+
+            if decisions:
+                decisions.extend(game.decisions[1:])
+            else:
+                decisions = game.decisions
+
+            if player_details: 
+                player_details.extend(game.player_details[1:])
+            else:
+                player_details = game.player_details
+    
+    
+    with open('games.csv', 'w', newline='') as f:
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        write.writerows(games)
+
+    with open('decisions.csv', 'w', newline='') as f:
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        write.writerows(decisions)
+    
+    with open('player_details.csv', 'w', newline='') as f:
+        # using csv.writer method from CSV package
+        write = csv.writer(f)
+        write.writerows(player_details)
+
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@ from collections import Counter
 import csv
 import logging
 import random
+import shortuuid
 
 logging.basicConfig(filename='dragonwood.log', encoding='utf-8', level=logging.DEBUG)
 
@@ -169,16 +170,19 @@ class Adventurer_Deck(Deck):
 
 class Player():
 
-    def __init__(self, risk_level: float, dice: Dice, name: str):
+    def __init__(self, risk_level: float, risk_adjustment: float, dice: Dice, name: str, card_mask: list[str]):
         self.hand = []
+        self.uuid = shortuuid.uuid()[:8]
         self.name = name
         self.adjusted_EV = risk_level + dice.EV
+        self.risk_adjustment = risk_adjustment
         self.dice = dice
         self.points = 0
         self.dw_cards = []
         self.strike_modifier = 0
         self.stomp_modifier = 0
         self.scream_modifier = 0
+        self.card_mask = card_mask
 
     def find_choices(self):
 
@@ -243,13 +247,18 @@ class Player():
         candidate_decisions = []
 
         for index, card in enumerate(landscape):
+
+            #skip card if in card_mask
+            if card in self.card_mask:
+                continue
+
             # Extracting strike, stomp, and scream values from the current card
             values = card.strike, card.stomp, card.scream
 
             for i, choice in enumerate(choices):
                 all_decisions = []
                 for option in choice:
-                    threshold = len(option) * self.adjusted_EV + getattr(self, f'{names[i]}_modifier')+0.1
+                    threshold = len(option) * self.adjusted_EV + getattr(self, f'{names[i]}_modifier') + self.risk_adjustment
                     if threshold > values[i]:
                         all_decisions.append([names[i], card, option, threshold - values[i], index])
 
@@ -288,6 +297,7 @@ class Game():
     def __init__(self, adventurer_deck: Adventurer_Deck, dragonwood_deck: Dragonwood_Deck, players: List[Player], hand_length: int):
         self.adventurer_deck = adventurer_deck
         self.dragonwood_deck = dragonwood_deck
+        self.uuid = shortuuid.uuid()[:8]
         self.players = players
         self.turns = 0
         self.winner = ''
@@ -295,33 +305,37 @@ class Game():
         self.initial_deal_adventurer(hand_length)
         self.initial_deal_landscape()
         random.seed()
-        self.game_detail = []
+        self.decisions = []
+        self.player_details = []
 
     def report(self):
 
-        report_dict = {}
-
-        report_dict["winner"] = self.winner
-        report_dict["game_detail"] = self.game_detail
-        report_dict["turns"] = self.turns
-
-        player_detail = []
+        player_details = [[
+            "game uuid",
+            "player uuid",
+            "name", 
+            "points", 
+            "adjusted_ev", 
+            "scream_modifier", 
+            "strike_modifier",
+            "stomp_modifier",
+            "winner"
+        ]]
 
         for player in self.players:
-            player_detail.append({
-                "name": player.name, 
-                "points": player.points, 
-                "adjusted_ev": player.adjusted_EV, 
-                "scream_modifier": player.scream_modifier, 
-                "strike_modifier": player.strike_modifier,
-                "stomp_modifier": player.stomp_modifier,
-                "final_hand": [str(x) for x in player.dw_cards],
-                "winner": player.name==self.winner
-            })
+            player_details.append([
+                self.uuid,
+                player.uuid,
+                player.name, 
+                player.points, 
+                player.adjusted_EV, 
+                player.scream_modifier, 
+                player.strike_modifier,
+                player.stomp_modifier,
+                player.uuid==self.winner
+            ])
 
-        report_dict["player_detail"] = player_detail
-        
-        return report_dict
+        self.player_details = player_details
 
     def __repr__(self) -> str:
         return f'Game({len(self.players)} players)'
@@ -367,6 +381,18 @@ class Game():
             logging.disable()
         logging.debug('start')
         
+        decisions = [[
+            "game uuid",
+            "turn",
+            "order",
+            "player uuid",
+            "selected dragonwood card",
+            "decision",
+            "dice roll",
+            "outcome",
+            "player points"]
+        ]
+
         while True:
 
             self.turns += 1
@@ -375,19 +401,18 @@ class Game():
 
                 decision = player.decide(self.landscape)
 
-                decision_detail = {}
-
                 if decision["decision"] == "reload":
-                    decision_detail = {
-                        "turn": self.turns,
-                        "order": order,
-                        "player": player.name,
-                        "selected adventure cards": "",
-                        "selected dragonwood card": "",
-                        "decision": decision["decision"],
-                        "dice roll": "",
-                        "outcome": "RELOAD"
-                    }
+                    decisions.append([
+                        self.uuid,
+                        self.turns,
+                        order,
+                        player.uuid,
+                        "",
+                        decision["decision"],
+                        "",
+                        "RELOAD",
+                        player.points
+                    ])
                     player.hand.extend(self.adventurer_deck.deal(1))
                     logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
                 else:
@@ -396,28 +421,32 @@ class Game():
 
                     if (dice_roll + modifiers) >= getattr(self.landscape[decision["card"]], decision["decision"]):
                         logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card"]]}-SUCCESS')
-                        decision_detail = {
-                            "turn": self.turns,
-                            "order": order,
-                            "player": player.name,
-                            "selected dragonwood card": str(self.landscape[decision["card"]]),
-                            "decision": decision["decision"],
-                            "dice roll": dice_roll,
-                            "outcome": "SUCCESS"
-                        }
+                        decisions.append([
+                            self.uuid,
+                            self.turns,
+                            order,
+                            player.uuid,
+                            self.landscape[decision["card"]].name,
+                            decision["decision"],
+                            dice_roll,
+                            "SUCCESS",
+                            player.points
+                        ])
         
                         self.success(player, decision)
                     else:
                         logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card"]]}-FAILURE')
-                        decision_detail = {
-                            "turn": self.turns,
-                            "order": order,
-                            "player": player.name,
-                            "selected dragonwood card": str(self.landscape[decision["card"]]),
-                            "decision": decision["decision"],
-                            "dice roll": dice_roll,
-                            "outcome": "FAILURE"
-                        }
+                        decisions.append([
+                            self.uuid,
+                            self.turns,
+                            order,
+                            player.uuid,
+                            self.landscape[decision["card"]].name,
+                            decision["decision"],
+                            dice_roll,
+                            "FAILURE",
+                            player.points
+                        ])
 
                         self.failure(player)
                 order +=1
@@ -426,8 +455,6 @@ class Game():
                 if len(player.hand) >9:
                     player.discard_card(self.adventurer_deck)
 
-                decision_detail["points"] = player.points
-                self.game_detail.append(decision_detail)
 
 
             # check if all the game ending cards have been captured and if so then break while loop
@@ -436,8 +463,8 @@ class Game():
             if not game_ending_cards or self.adventurer_deck.number_of_deals > 3:
                 break
         
-        players_scores =[(player.name, player.points) for player in self.players]
-        
+        players_scores =[(player.uuid, player.points) for player in self.players]
+        self.decisions = decisions
         self.winner, _ = max(players_scores, key=lambda x: x[1])
 
 
