@@ -1,2 +1,7 @@
 dragonwood.log
 data/
+decisions.csv
+games.csv
+player_details.csv
+model/__pycache__/
+model/__pycache__/dragonwood.cpython-312.pyc

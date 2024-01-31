@@ -248,9 +248,10 @@ class Player():
 
         for index, card in enumerate(landscape):
 
-            #skip card if in card_mask
-            if card in self.card_mask:
-                continue
+            # skip card if in card_mask
+            for en_card in self.card_mask:
+                if en_card in [x.name for x in self.dw_cards]:
+                    pass
 
             # Extracting strike, stomp, and scream values from the current card
             values = card.strike, card.stomp, card.scream
@@ -267,7 +268,9 @@ class Player():
 
         if candidate_decisions:
             # Use key=lambda x: x[3] to get the element with the smallest positive difference
+            logging.debug(f'CANDIDATES {self.strike_modifier}-{self.stomp_modifier}-{self.scream_modifier}-{candidate_decisions}')
             selected_option = min(candidate_decisions, key=lambda x: x[3])
+            logging.debug(f'CANDIDATE {selected_option}')
             decision["decision"] = selected_option[0]  # strike/stomp/scream
             decision["card"] = selected_option[4]  # the card index within the landscape
             decision["adventurers"] = selected_option[2]  # the adventurers used
@@ -285,16 +288,18 @@ class Player():
         potential_cards = [(i, x) for i, x in enumerate(self.hand) if x not in choices_cards]
 
         if potential_cards:
+            logging.debug(f'DISCARD {self.hand} - {self.hand[potential_cards[0][0]]}')
             adventurer_deck.discard.append(potential_cards[0][1])
             del self.hand[potential_cards[0][0]]
         else:
+            logging.debug(f'DISCARD {self.hand} - {self.hand[0]}')
             adventurer_deck.discard.append(self.hand[0])
             del self.hand[0]
-        
+
 
 
 class Game():
-    def __init__(self, adventurer_deck: Adventurer_Deck, dragonwood_deck: Dragonwood_Deck, players: List[Player], hand_length: int):
+    def __init__(self, adventurer_deck: Adventurer_Deck, dragonwood_deck: Dragonwood_Deck, players: Player, hand_length: int):
         self.adventurer_deck = adventurer_deck
         self.dragonwood_deck = dragonwood_deck
         self.uuid = shortuuid.uuid()[:8]
@@ -420,7 +425,7 @@ class Game():
                     modifiers = getattr(player, decision["decision"] + "_modifier")
 
                     if (dice_roll + modifiers) >= getattr(self.landscape[decision["card"]], decision["decision"]):
-                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card"]]}-SUCCESS')
+                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card"]]}-SUCCESS')
                         decisions.append([
                             self.uuid,
                             self.turns,
@@ -435,7 +440,7 @@ class Game():
         
                         self.success(player, decision)
                     else:
-                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card"]]}-FAILURE')
+                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card"]]}-FAILURE')
                         decisions.append([
                             self.uuid,
                             self.turns,

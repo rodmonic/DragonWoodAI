@@ -5,15 +5,9 @@ import csv
 from more_itertools import powerset
 
 
-column_headers = ["winner", 
-            "player 1 name","player 1 score", "player 1 EV", "player 1 strike modifier", "player 1 stomp modifier", "player 1 scream modifier",
-            "player 2 name","player 2 score", "player 2 EV", "player 2 strike modifier", "player 2 stomp modifier", "player 2 scream modifier",
-            "player 3 name","player 3 score", "player 3 EV", "player 3 strike modifier", "player 3 stomp modifier", "player 3 scream modifier",
-            "player 4 name","player 4 score", "player 4 EV", "player 4 strike modifier", "player 4 stomp modifier", "player 4 scream modifier"]
-
 def main():
 
-    model_games(1000)
+    model_games(100)
     # model_hands(100000)
     # model_dice(10000)
 
@@ -93,36 +87,36 @@ def model_games(iterations):
     enhancement_mask_powerset = powerset(enhancement_mask)
 
 
-    for mask in tqdm(enhancement_mask_powerset):
-        for _ in tqdm(range(iterations)):
+    # for mask in tqdm(enhancement_mask_powerset):
+    for _ in tqdm(range(iterations)):
 
-            adventurer_deck = dw.Adventurer_Deck(5, 12)
-            dragonwood_deck = dw.Dragonwood_Deck('./cards/creatures.csv', './cards/enhancements.csv')
-            dice = dw.Dice([1, 2, 2, 3, 3, 4])
-            players = [dw.Player(0.5, -0.1, dice, "Alice", mask),
-                        dw.Player(0.5, -0.1, dice, "Bob", []),
-                        dw.Player(0.5, -0.1, dice, "Charles", []),
-                        dw.Player(0.5, -0.1, dice, "Dylan", [])
-                        ]
-            game = dw.Game(adventurer_deck, dragonwood_deck, players, 5)
-            game.play(False)
-            game.report()
-            games.append([
-                game.uuid,
-                game.winner,
-                game.turns,
-                mask
-            ])
+        adventurer_deck = dw.Adventurer_Deck(5, 12)
+        dragonwood_deck = dw.Dragonwood_Deck('./cards/creatures.csv', './cards/enhancements.csv')
+        dice = dw.Dice([1, 2, 2, 3, 3, 4])
+        players = [dw.Player(0.5, -0.1, dice, "Alice", []),
+                    dw.Player(0.5, -0.1, dice, "Bob", []),
+                    dw.Player(0.5, -0.1, dice, "Charles", []),
+                    dw.Player(0.5, -0.1, dice, "Dylan", [])
+                    ]
+        game = dw.Game(adventurer_deck, dragonwood_deck, players, 5)
+        game.play(True)
+        game.report()
+        games.append([
+            game.uuid,
+            game.winner,
+            game.turns,
+            enhancement_mask
+        ])
 
-            if decisions:
-                decisions.extend(game.decisions[1:])
-            else:
-                decisions = game.decisions
+        if decisions:
+            decisions.extend(game.decisions[1:])
+        else:
+            decisions = game.decisions
 
-            if player_details: 
-                player_details.extend(game.player_details[1:])
-            else:
-                player_details = game.player_details
+        if player_details: 
+            player_details.extend(game.player_details[1:])
+        else:
+            player_details = game.player_details
     
     
     with open('games.csv', 'w', newline='') as f:
