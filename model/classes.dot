@@ -1,0 +1,22 @@
+digraph "classes" {
+rankdir=BT
+charset="utf-8"
+"model.dragonwood.Adventurer" [color="black", fontcolor="black", label=<{Adventurer|suit : int<br ALIGN="LEFT"/>value : int<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"model.dragonwood.Adventurer_Deck" [color="black", fontcolor="black", label=<{Adventurer_Deck|cards<br ALIGN="LEFT"/>number_of_deals : int<br ALIGN="LEFT"/>suits<br ALIGN="LEFT"/>|generate_adventurer_deck(suits, values)<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"model.dragonwood.Card" [color="black", fontcolor="black", label=<{Card|name : str<br ALIGN="LEFT"/>scream : int<br ALIGN="LEFT"/>stomp : int<br ALIGN="LEFT"/>strike : int<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"model.dragonwood.Creature" [color="black", fontcolor="black", label=<{Creature|game_ender : bool<br ALIGN="LEFT"/>points : int<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"model.dragonwood.Deck" [color="black", fontcolor="black", label=<{Deck|cards : list<br ALIGN="LEFT"/>discard : list<br ALIGN="LEFT"/>number_of_deals<br ALIGN="LEFT"/>|deal(n: int)<br ALIGN="LEFT"/>shuffle()<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"model.dragonwood.Dice" [color="black", fontcolor="black", label=<{Dice|EV : int<br ALIGN="LEFT"/>values : list<br ALIGN="LEFT"/>|caculate_EV()<br ALIGN="LEFT"/>roll_n_dice(n)<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"model.dragonwood.Dragonwood_Deck" [color="black", fontcolor="black", label=<{Dragonwood_Deck|<br ALIGN="LEFT"/>|import_creatures(filepath)<br ALIGN="LEFT"/>import_enhancements(filepath)<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"model.dragonwood.Enhancement" [color="black", fontcolor="black", label=<{Enhancement|modifications : list[object]<br ALIGN="LEFT"/>modifier : int<br ALIGN="LEFT"/>permanent : bool<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"model.dragonwood.Game" [color="black", fontcolor="black", label=<{Game|adventurer_deck<br ALIGN="LEFT"/>decisions : list<br ALIGN="LEFT"/>dragonwood_deck<br ALIGN="LEFT"/>landscape : list<br ALIGN="LEFT"/>player_details : list<br ALIGN="LEFT"/>players<br ALIGN="LEFT"/>turns : int<br ALIGN="LEFT"/>uuid : str<br ALIGN="LEFT"/>winner : str<br ALIGN="LEFT"/>|failure(player)<br ALIGN="LEFT"/>initial_deal_adventurer(hand_length)<br ALIGN="LEFT"/>initial_deal_landscape()<br ALIGN="LEFT"/>play(debug: bool)<br ALIGN="LEFT"/>report()<br ALIGN="LEFT"/>success(player, decision)<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"model.dragonwood.Player" [color="black", fontcolor="black", label=<{Player|adjusted_EV<br ALIGN="LEFT"/>card_mask : list[str]<br ALIGN="LEFT"/>choices : tuple<br ALIGN="LEFT"/>dice<br ALIGN="LEFT"/>dw_cards : list<br ALIGN="LEFT"/>hand : list<br ALIGN="LEFT"/>name : str<br ALIGN="LEFT"/>points : int<br ALIGN="LEFT"/>risk_adjustment : float<br ALIGN="LEFT"/>scream_modifier : int<br ALIGN="LEFT"/>stomp_modifier : int<br ALIGN="LEFT"/>strike_modifier : int<br ALIGN="LEFT"/>uuid : str<br ALIGN="LEFT"/>|decide(landscape)<br ALIGN="LEFT"/>discard_card(adventurer_deck)<br ALIGN="LEFT"/>find_choices()<br ALIGN="LEFT"/>find_screams()<br ALIGN="LEFT"/>find_stomps()<br ALIGN="LEFT"/>find_strikes()<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"model.dragonwood.Adventurer_Deck" -> "model.dragonwood.Deck" [arrowhead="empty", arrowtail="none"];
+"model.dragonwood.Creature" -> "model.dragonwood.Card" [arrowhead="empty", arrowtail="none"];
+"model.dragonwood.Dragonwood_Deck" -> "model.dragonwood.Deck" [arrowhead="empty", arrowtail="none"];
+"model.dragonwood.Enhancement" -> "model.dragonwood.Card" [arrowhead="empty", arrowtail="none"];
+"model.dragonwood.Adventurer_Deck" -> "model.dragonwood.Game" [arrowhead="odiamond", arrowtail="none", fontcolor="green", label="adventurer_deck", style="solid"];
+"model.dragonwood.Dice" -> "model.dragonwood.Player" [arrowhead="odiamond", arrowtail="none", fontcolor="green", label="dice", style="solid"];
+"model.dragonwood.Dragonwood_Deck" -> "model.dragonwood.Game" [arrowhead="odiamond", arrowtail="none", fontcolor="green", label="dragonwood_deck", style="solid"];
+"model.dragonwood.Player" -> "model.dragonwood.Game" [arrowhead="odiamond", arrowtail="none", fontcolor="green", label="players", style="solid"];
+}
