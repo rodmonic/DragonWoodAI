@@ -1,7 +1,8 @@
 dragonwood.log
-data/
+data/*
 decisions.csv
 games.csv
 player_details.csv
-model/__pycache__/
-model/__pycache__/dragonwood.cpython-312.pyc
+dragonwood/__pycache__/*
+dragonwood/__pycache__/dice.cpython-312.pyc
+tests/__pycache__/*
