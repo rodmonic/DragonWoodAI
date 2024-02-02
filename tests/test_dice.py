@@ -1,7 +1,7 @@
 
-import dragonwood.dice as dw
+from Dragonwood.Dice import Dice
 
-dice = dw.Dice([1,2,3,4,5,6], 100)
+dice = Dice([1,2,3,4,5,6], 100)
     
 def test_card_EV_creation():
 
