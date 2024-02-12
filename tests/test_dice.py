@@ -1,7 +1,10 @@
-
 from Dragonwood.Dice import Dice
+import Dragonwood.SharedRandom as sr
+sr.set_seed(100)
 
-dice = Dice([1,2,3,4,5,6], 100)
+
+
+dice = Dice([1,2,3,4,5,6])
     
 def test_card_EV_creation():
 

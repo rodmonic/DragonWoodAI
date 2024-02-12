@@ -1,7 +1,4 @@
 
-from numpy import isin
-
-
 class Dragonwood_Card():
     def __init__(self, strike: int, stomp: int, scream: int, name: str) -> None:
         self.strike = strike

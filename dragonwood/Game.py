@@ -1,17 +1,17 @@
 from typing import List
 import itertools
 import logging
-import random
 import shortuuid
 from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck
 from Dragonwood.Player import Player
 from Dragonwood.Card import Creature, Enhancement
 from Dragonwood.Dice import Dice
+from Dragonwood.SharedRandom import shared_random
 
 logging.basicConfig(filename='dragonwood.log', encoding='utf-8', level=logging.DEBUG)
 
 class Game():
-    def __init__(self, adventurer_deck: Adventurer_Deck, dragonwood_deck: Dragonwood_Deck, players: List[Player], dice: Dice, seed: int|None = None):
+    def __init__(self, adventurer_deck: Adventurer_Deck, dragonwood_deck: Dragonwood_Deck, players: List[Player], dice: Dice, shuffle_players: bool = True):
         self.adventurer_deck = adventurer_deck
         self.dragonwood_deck = dragonwood_deck
         self.dice = dice
@@ -21,8 +21,15 @@ class Game():
         self.landscape = []
         self.initial_deal_adventurer()
         self.initial_deal_landscape()
+        self.dragonwood_deck.initial_config(len(self.players))
         self.winner = ''
-        random.seed(seed)
+        self.shuffle_players = shuffle_players
+
+
+    def __repr__(self) -> str:
+
+        return f'Game({len(self.players)} players)'
+
 
     def get_players_details(self):
 
@@ -32,6 +39,7 @@ class Game():
             player_details = player.get_player_details()
             player_details["game_uuid"] = self.uuid
             player_details["winner"] = player.uuid==self.winner
+
             players_details.append(player_details)
 
         return players_details
@@ -56,11 +64,7 @@ class Game():
         sorted_players_with_max_points = sorted(players_with_max_points, key=lambda x: len(x.dragonwood_cards))
 
         return sorted_players_with_max_points[0].uuid
-
-
-    def __repr__(self) -> str:
-
-        return f'Game({len(self.players)} players)'
+    
 
     def initial_deal_adventurer(self):
 
@@ -88,13 +92,16 @@ class Game():
         player.hand = [x for x in player.hand if x not in decision["adventurers"]]
         self.adventurer_deck.discard.extend(decision["adventurers"])
 
+
     def failure(self, player):
         player.discard_card(self.adventurer_deck)
+
 
     def play(self, debug: bool = False):
 
         # Shuffle players
-        random.shuffle(self.players)
+        if self.shuffle_players:
+            shared_random.shuffle(self.players)
 
         if not debug:
             logging.disable()
@@ -111,11 +118,11 @@ class Game():
 
                 if decision["decision"] == "reload":
                     decision_detail = {
-                        "game uuid": self.uuid,
+                        "game_uuid": self.uuid,
                         "turn": self.turns,
-                        "player uuid": player.uuid,
+                        "player_uuid": player.uuid,
                         "outcome": "RELOAD",
-                        "player points": player.points
+                        "player_points": player.points
                     }
 
                     player.hand.extend(self.adventurer_deck.deal(1))
@@ -125,13 +132,13 @@ class Game():
                     modifiers = getattr(player, decision["decision"] + "_modifier")
 
                     decision_detail = {
-                            "game uuid": self.uuid,
+                            "game_uuid": self.uuid,
                             "turn": self.turns,
-                            "player uuid": player.uuid,
+                            "player_uuid": player.uuid,
                             "selected dragonwood card": self.landscape[decision["card_index"]].name,
                             "decision": decision["decision"],
-                            "dice roll": dice_roll,
-                            "player points": player.points
+                            "dice_roll": dice_roll,
+                            "player_points": player.points
                             }
 
 
@@ -147,17 +154,19 @@ class Game():
 
                 decisions.append(decision_detail)
 
-                
+                # check if all the game ending cards have been captured and if so then break while loop
+                remaining_DW_cards = itertools.chain(self.dragonwood_deck.cards, self.landscape)
+                game_ending_cards = sum([x.game_ender for x in remaining_DW_cards if type(x) is Creature])
+                if game_ending_cards == 0:
+                    break
 
                 if len(player.hand) >9:
                     player.discard_card(self.adventurer_deck)
 
             self.turns += 1
 
-            # check if all the game ending cards have been captured and if so then break while loop
-            remaining_DW_cards = itertools.chain(self.dragonwood_deck.cards, self.landscape)
-            game_ending_cards = sum([x.game_ender for x in remaining_DW_cards if type(x) is Creature])
-            if not game_ending_cards or self.adventurer_deck.number_of_deals > 3:
+
+            if self.adventurer_deck.number_of_deals > 2:
                 break
         
         self.winner = self.get_winner()

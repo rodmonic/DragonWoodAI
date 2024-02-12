@@ -1,8 +1,11 @@
 from Dragonwood.Player import Player
 from Dragonwood.Deck import Dragonwood_Deck, Adventurer_Deck, Adventurer_Card
+import Dragonwood.SharedRandom as sr
+sr.set_seed(100)
 
-dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv", 100)
-adventurer_deck = Adventurer_Deck(5,13,100)
+
+dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
+adventurer_deck = Adventurer_Deck(5,13)
 player = Player(0, 0, "Alice")
 
 player.hand = adventurer_deck.deal(10)

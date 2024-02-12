@@ -2,10 +2,9 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from tqdm import tqdm
+from more_itertools import powerset
 
 import pandas as pd
-
-from more_itertools import powerset
 
 from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck
 from Dragonwood.Dice import Dice
@@ -24,8 +23,8 @@ class GameConfig():
     creature_filepath: str
     enhancement_filepath: str
     seed: int|None = None
-    card_mask: list[str] = field(default_factory=list)
-    superset_card_mask: bool = False
+    card_mask: list[list[str]] = None
+    powerset_card_mask: bool = False
     shuffle_players: bool = True
     attack_selection_fuction: Callable|None = None
 
@@ -34,31 +33,48 @@ class GameConfig():
         player_details = []
         games = []
 
+        if not self.card_mask:
+            self.card_mask = [[]]
+
+        if self.powerset_card_mask:
+            self.card_mask = powerset(self.card_mask[0])
+
         for i in tqdm(self.range_of_risk_level):
             for j in tqdm(self.range_of_risk_adjustement):
-                for _ in tqdm(range(self.number_of_iterations)):
-                    adventurer_deck = Adventurer_Deck(self.adventurer_suits, self.adventurer_values, self.seed)
-                    dragonwood_deck = Dragonwood_Deck(self.creature_filepath, self.enhancement_filepath, self.seed)
-                    dice = Dice(self.dice_values,self.seed)
+                for mask in self.card_mask:
+                    for _ in tqdm(range(self.number_of_iterations)):
+                        adventurer_deck = Adventurer_Deck(self.adventurer_suits, self.adventurer_values, self.seed)
+                        dragonwood_deck = Dragonwood_Deck(self.creature_filepath, self.enhancement_filepath, self.seed)
+                        dice = Dice(self.dice_values)
 
-                    players=[]
-                    for k in range(self.number_of_players):
+                        players=[]
+
                         players.append(Player(
-                            i,
-                            j,
-                            f"player{k}",
-                            self.card_mask
-                            ))
-                    
-                    game = Game(adventurer_deck, dragonwood_deck, players, dice, self.seed)
-                    result = game.play()
-                    decisions.extend(result["decisions"])
-                    player_details.extend(result["players_details"])
-                    games.append({
-                            "game_uuid": result["game_uuid"],
-                            "winner": result["winner"],
-                            "turns": result["turns"]
-                        })
+                                i,
+                                j,
+                                "player 0",
+                                mask
+                                )
+                            )
+
+                        for k in range(1,self.number_of_players):
+                            players.append(Player(
+                                0,
+                                0,
+                                f"player {k}",
+                                []
+                                ))
+                        
+                        game = Game(adventurer_deck, dragonwood_deck, players, dice, self.shuffle_players)
+                        result = game.play()
+                        decisions.extend(result["decisions"])
+                        player_details.extend(result["players_details"])
+                        games.append({
+                                "game_uuid": result["game_uuid"],
+                                "winner": result["winner"],
+                                "turns": result["turns"],
+                                "mask": mask
+                            })
                 
         return Results(games, decisions, player_details)
 
@@ -69,11 +85,11 @@ class Results():
     decisions: list[dict]
     player_details: list[dict]
 
-    def export(self, filepath: str)-> None:
-        
+    def export(self, filepath: str, include_mask: list[str] = [])-> None:
+
         attributes = ["games", "decisions", "player_details"]
         
-        for attribute in attributes:
+        for attribute in [x for x in attributes if x not in include_mask]:
             df = pd.DataFrame.from_dict(getattr(self, attribute))
             df.to_csv(f'{filepath}/\{attribute}.csv')
 

@@ -1,19 +1,22 @@
 from Dragonwood.Deck import Dragonwood_Deck, Adventurer_Deck
+import Dragonwood.SharedRandom as sr
+sr.set_seed(100)
 
-dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv", 100)
-adventurer_deck = Adventurer_Deck(5,13,100)
+dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
+adventurer_deck = Adventurer_Deck(5,13)
+
 
 def test_dragonwood_deck_import():
 
     assert len(dragonwood_deck.cards) == 39
-    assert dragonwood_deck.cards[0].name == "Bucket of Spinach"
+    assert dragonwood_deck.cards[0].name == "Grumpy Troll"
 
 
 def test_dragonwood_deck_deal_cards():
     cards = dragonwood_deck.deal(5)
 
     assert len(cards) == 5
-    assert [x.name for x in cards] == ['Bucket of Spinach', 'Grumpy Troll', "Wasps Nest", 'Spooky Spiders', 'Crazy Bats']
+    assert [x.name for x in cards] == ['Grumpy Troll', 'Grumpy Troll', "Giggling Goblin", 'Giggling Goblin', 'Hungry Bear']
 
 def test_dragonwood_deck_doesnt_redeal():
     

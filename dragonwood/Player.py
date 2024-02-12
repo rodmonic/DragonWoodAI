@@ -20,16 +20,17 @@ class Player():
         self.scream_modifier = 0
         self.card_mask = card_mask
 
-    def get_player_details(self):
+    def get_player_details(self) -> dict:
         
         return {
-            "player uuid": self.uuid,
+            "player_uuid": self.uuid,
             "name": self.name,
             "points": self.points,
             "risk_level": self.risk_level,
+            "risk_adjustment": self.risk_adjustment,
             "scream_modifier": self.scream_modifier, 
             "strike_modifier": self.strike_modifier,
-            "stomp_modifier": self.stomp_modifier,       
+            "stomp_modifier": self.stomp_modifier,      
             }
 
     def find_attack_options(self) -> tuple[
@@ -108,9 +109,9 @@ class Player():
             if card.name in self.card_mask:
                 continue
 
-            for i, attack_option in enumerate(attack_options):
+            for _, attack_option in enumerate(attack_options):
 
-                threshold = len(attack_option[1]) * (self.risk_adjustment + dice_ev) + getattr(self, f'{attack_option[0]}_modifier') + self.risk_adjustment
+                threshold = len(attack_option[1]) * (self.risk_level + dice_ev) + getattr(self, f'{attack_option[0]}_modifier') + self.risk_adjustment
                 if threshold > getattr(card, attack_option[0]):
                     candidate_decisions.append([attack_option[0], card, attack_option[1], threshold - getattr(card, attack_option[0]), index])
                             
