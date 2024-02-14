@@ -43,8 +43,8 @@ class GameConfig():
             for j in tqdm(self.range_of_risk_adjustement):
                 for mask in self.card_mask:
                     for _ in tqdm(range(self.number_of_iterations)):
-                        adventurer_deck = Adventurer_Deck(self.adventurer_suits, self.adventurer_values, self.seed)
-                        dragonwood_deck = Dragonwood_Deck(self.creature_filepath, self.enhancement_filepath, self.seed)
+                        adventurer_deck = Adventurer_Deck(self.adventurer_suits, self.adventurer_values)
+                        dragonwood_deck = Dragonwood_Deck(self.creature_filepath, self.enhancement_filepath)
                         dice = Dice(self.dice_values)
 
                         players=[]

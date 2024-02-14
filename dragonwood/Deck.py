@@ -93,7 +93,6 @@ class Dragonwood_Deck(Deck):
         number_cards_to_remove = 12 - ((number_of_players - 2)*2)
         cards = non_game_enders[number_cards_to_remove:]
 
-
         # shuffle game ending cards in the bottom of the deck.
         top_cards = cards[:len(cards)//2]
         bottom_cards = list(itertools.chain(cards[len(cards)//2:], game_enders))

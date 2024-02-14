@@ -61,7 +61,7 @@ class Game():
 
         max_points = max([x.points for x in self.players])  
         players_with_max_points = [player for player in self.players if player.points == max_points]
-        sorted_players_with_max_points = sorted(players_with_max_points, key=lambda x: len(x.dragonwood_cards))
+        sorted_players_with_max_points = sorted(players_with_max_points, key=lambda x: len(x.dragonwood_cards), reverse=True)
 
         return sorted_players_with_max_points[0].uuid
     
@@ -77,18 +77,19 @@ class Game():
         self.landscape.extend(self.dragonwood_deck.deal(5))
 
     def success(self, player, decision):
-        dw_card = self.landscape[decision["card_index"]]
+        dw_card = decision["card"]
         player.dragonwood_cards.append(dw_card)
 
         if type(dw_card) is Creature:
-            player.points += self.landscape[decision["card_index"]].points
+            player.points += decision["card"].points
             self.landscape.extend(self.dragonwood_deck.deal(1))
         elif type(dw_card) is Enhancement:
             for modification in dw_card.modifications:
                 current_value = getattr(player, modification)
                 setattr(player, modification, dw_card.modifier + current_value)
 
-        del self.landscape[decision["card_index"]]
+        self.landscape.remove(decision["card"])
+
         player.hand = [x for x in player.hand if x not in decision["adventurers"]]
         self.adventurer_deck.discard.extend(decision["adventurers"])
 
@@ -96,88 +97,92 @@ class Game():
     def failure(self, player):
         player.discard_card(self.adventurer_deck)
 
+    def enact_decision(self, decision: dict, player: Player) -> None:
+
+        decision_detail = {}
+
+        if decision["decision"] == "reload":
+            decision_detail = {
+                "game_uuid": self.uuid,
+                "turn": self.turns,
+                "player_uuid": player.uuid,
+                "outcome": "RELOAD",
+                "player_points": player.points
+            }
+
+            player.hand.extend(self.adventurer_deck.deal(1))
+            logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
+        else:
+            dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
+            modifiers = getattr(player, decision["decision"] + "_modifier")
+
+            decision_detail = {
+                    "game_uuid": self.uuid,
+                    "turn": self.turns,
+                    "player_uuid": player.uuid,
+                    "selected dragonwood card": decision["card"].name,
+                    "decision": decision["decision"],
+                    "dice_roll": dice_roll,
+                    "player_points": player.points
+                    }
+
+            if (dice_roll + modifiers) >= getattr(decision["card"], decision["decision"]):
+                logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-SUCCESS')
+                decision_detail["outcome"] = "SUCCESS"
+                self.success(player, decision)
+
+            else:
+                logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-FAILURE')
+                decision_detail["outcome"] = "FAILURE"
+                self.failure(player)
+
+        return decision_detail
+
+    def have_all_game_enders_been_captured(self) -> bool:
+
+        # check if all the game ending cards have been captured and if so then break while loop
+        remaining_DW_cards = itertools.chain(self.dragonwood_deck.cards, self.landscape)
+        game_ending_cards = sum([x.game_ender for x in remaining_DW_cards if type(x) is Creature])
+
+        return game_ending_cards == 0
 
     def play(self, debug: bool = False):
 
-        # Shuffle players
-        if self.shuffle_players:
-            shared_random.shuffle(self.players)
+            # Shuffle players
+            if self.shuffle_players:
+                shared_random.shuffle(self.players)
 
-        if not debug:
-            logging.disable()
-        logging.debug('start')
+            if not debug:
+                logging.disable()
+            logging.debug('start')
 
-        decisions = []
+            decisions = []
 
-        while True:
+            while True:
 
-            for player in self.players:
-                
-                decision_detail = {}
-                decision = player.decide(self.landscape, self.dice.EV)
+                for player in self.players:
 
-                if decision["decision"] == "reload":
-                    decision_detail = {
-                        "game_uuid": self.uuid,
-                        "turn": self.turns,
-                        "player_uuid": player.uuid,
-                        "outcome": "RELOAD",
-                        "player_points": player.points
-                    }
+                    decision = player.decide(self.landscape, self.dice.EV)
+                    decisions.append(self.enact_decision(decision, player))
+                    if self.have_all_game_enders_been_captured:
+                        break
 
-                    player.hand.extend(self.adventurer_deck.deal(1))
-                    logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
-                else:
-                    dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
-                    modifiers = getattr(player, decision["decision"] + "_modifier")
+                    if len(player.hand) >9:
+                        player.discard_card(self.adventurer_deck)
 
-                    decision_detail = {
-                            "game_uuid": self.uuid,
-                            "turn": self.turns,
-                            "player_uuid": player.uuid,
-                            "selected dragonwood card": self.landscape[decision["card_index"]].name,
-                            "decision": decision["decision"],
-                            "dice_roll": dice_roll,
-                            "player_points": player.points
-                            }
+                self.turns += 1
 
-
-                    if (dice_roll + modifiers) >= getattr(self.landscape[decision["card_index"]], decision["decision"]):
-                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card_index"]]}-SUCCESS')
-                        decision_detail["outcome"] = "SUCCESS"
-                        self.success(player, decision)
-
-                    else:
-                        logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{self.landscape[decision["card_index"]]}-FAILURE')
-                        decision_detail["outcome"] = "FAILURE"
-                        self.failure(player)
-
-                decisions.append(decision_detail)
-
-                # check if all the game ending cards have been captured and if so then break while loop
-                remaining_DW_cards = itertools.chain(self.dragonwood_deck.cards, self.landscape)
-                game_ending_cards = sum([x.game_ender for x in remaining_DW_cards if type(x) is Creature])
-                if game_ending_cards == 0:
+                if self.adventurer_deck.number_of_deals > 2:
                     break
+            
+            self.winner = self.get_winner()
 
-                if len(player.hand) >9:
-                    player.discard_card(self.adventurer_deck)
-
-            self.turns += 1
-
-
-            if self.adventurer_deck.number_of_deals > 2:
-                break
+            return {
+                "game_uuid": self.uuid,
+                "winner": self.winner,
+                "turns": self.turns,
+                "decisions": decisions,
+                "players_details": self.get_players_details()
+            }
         
-        self.winner = self.get_winner()
-
-        return {
-            "game_uuid": self.uuid,
-            "winner": self.winner,
-            "turns": self.turns,
-            "decisions": decisions,
-            "players_details": self.get_players_details()
-        }
-    
-
 

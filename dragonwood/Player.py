@@ -1,3 +1,4 @@
+import select
 import shortuuid
 from collections import Counter
 from itertools import chain
@@ -96,40 +97,43 @@ class Player():
     def decide(self, landscape: list[Dragonwood_Card], dice_ev: float) -> dict:
 
         if not self.hand:
-
             return {"decision": "reload"}
 
-        attack_options = self.find_attack_options()
+        candidate_decisions = self.get_candidate_decisions(landscape, dice_ev)
 
+        if not candidate_decisions:
+            return {"decision": "reload"}
+
+        # Use key=lambda x: x[3] to get the element with the smallest positive difference
+        selected_option = min(candidate_decisions, key=lambda x: x[3])
+
+        return {
+            "decision": selected_option[0],      # strike/stomp/scream
+            "card": selected_option[1],          # the card  within the landscape
+            "adventurers":  selected_option[2],  # the adventurers used
+            
+        }
+
+            
+    def get_candidate_decisions(self, landscape: list[Dragonwood_Card], dice_ev: float) -> list[list[Adventurer_Card]]:
+        
+        attack_options = self.find_attack_options()
         candidate_decisions = []
 
-        for index, card in enumerate(landscape):
+        for card in landscape:
 
             # skip card if in card_mask
             if card.name in self.card_mask:
                 continue
 
-            for _, attack_option in enumerate(attack_options):
+            for attack_option in attack_options:
 
                 threshold = len(attack_option[1]) * (self.risk_level + dice_ev) + getattr(self, f'{attack_option[0]}_modifier') + self.risk_adjustment
                 if threshold > getattr(card, attack_option[0]):
-                    candidate_decisions.append([attack_option[0], card, attack_option[1], threshold - getattr(card, attack_option[0]), index])
+                    candidate_decisions.append([attack_option[0], card, attack_option[1], threshold - getattr(card, attack_option[0])])
+        
+        return candidate_decisions
                             
-
-        if candidate_decisions:
-            # Use key=lambda x: x[3] to get the element with the smallest positive difference
-            selected_option = min(candidate_decisions, key=lambda x: x[3])
-
-            return {
-                "decision": selected_option[0],  # strike/stomp/scream
-                "card_index": selected_option[4],  # the card index within the landscape
-                "adventurers":  selected_option[2]  # the adventurers used
-            }
-
-        else:
-            return {"decision": "reload"}
-
-
     def discard_card(self, adventurer_deck: Adventurer_Deck) -> None:
         
         attack_options = self.find_attack_options()
