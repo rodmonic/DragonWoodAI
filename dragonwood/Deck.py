@@ -5,6 +5,7 @@ from Dragonwood.Card import Creature, Enhancement, Adventurer_Card, Dragonwood_C
 import ast
 from typing import List
 
+
 class Deck:
     def __init__(self):
         self.cards = []
@@ -13,13 +14,13 @@ class Deck:
     def shuffle(self) -> None:
         shared_random.shuffle(self.cards)
 
-    def deal(self, n: int) -> List[Adventurer_Card|Dragonwood_Card]:
+    def deal(self, n: int) -> List[Adventurer_Card | Dragonwood_Card]:
         cards_delt = []
         for _ in range(n):
 
             if not self.cards and type(self) is Adventurer_Deck:
                 self.cards = self.discard
-                self.discard= []
+                self.discard = []
                 self.shuffle()
                 self.number_of_deals += 1
 
@@ -30,11 +31,10 @@ class Deck:
                 break
 
         return cards_delt
-    
 
 
 class Dragonwood_Deck(Deck):
-    def __init__(self, creatures_file_path: str, enchantments_file_path: str, seed: int|None = None) -> None:
+    def __init__(self, creatures_file_path: str, enchantments_file_path: str, seed: int | None = None) -> None:
         Deck.__init__(self)
         self.import_creatures(creatures_file_path)
         self.import_enhancements(enchantments_file_path)
@@ -81,12 +81,12 @@ class Dragonwood_Deck(Deck):
                         permanent=bool(enhancement[6])
                         )
                     )
-    
+
     def initial_config(self, number_of_players: int) -> None:
-        
+
         self.shuffle()
         # extract game ending cards
-        game_enders = [x for x in self.cards if type(x) == Creature and x.game_ender]
+        game_enders = [x for x in self.cards if type(x) is Creature and x.game_ender]
         non_game_enders = [x for x in self.cards if x not in game_enders]
 
         # remove cards based on number of players
@@ -107,7 +107,6 @@ class Adventurer_Deck(Deck):
         self.generate_adventurer_deck(suits, values)
         self.shuffle()
         self.number_of_deals = 1
-
 
     def generate_adventurer_deck(self, suits: int, values: int) -> None:
         # adventurer cards

@@ -10,6 +10,7 @@ from Dragonwood.SharedRandom import shared_random
 
 logging.basicConfig(filename='dragonwood.log', encoding='utf-8', level=logging.DEBUG)
 
+
 class Game():
     def __init__(self, adventurer_deck: Adventurer_Deck, dragonwood_deck: Dragonwood_Deck, players: List[Player], dice: Dice, shuffle_players: bool = True):
         self.adventurer_deck = adventurer_deck
@@ -25,11 +26,9 @@ class Game():
         self.winner = ''
         self.shuffle_players = shuffle_players
 
-
     def __repr__(self) -> str:
 
         return f'Game({len(self.players)} players)'
-
 
     def get_players_details(self):
 
@@ -38,12 +37,11 @@ class Game():
         for player in self.players:
             player_details = player.get_player_details()
             player_details["game_uuid"] = self.uuid
-            player_details["winner"] = player.uuid==self.winner
+            player_details["winner"] = player.uuid == self.winner
 
             players_details.append(player_details)
 
         return players_details
-    
 
     def get_winner(self):
 
@@ -54,17 +52,16 @@ class Game():
             point_modifier = 3
         else:
             point_modifier = 2
-        
+
         for player in self.players:
             if player.uuid in players_uuids_with_max_creatures:
-                player.points+=point_modifier
+                player.points += point_modifier
 
-        max_points = max([x.points for x in self.players])  
+        max_points = max([x.points for x in self.players])
         players_with_max_points = [player for player in self.players if player.points == max_points]
         sorted_players_with_max_points = sorted(players_with_max_points, key=lambda x: len(x.dragonwood_cards), reverse=True)
 
         return sorted_players_with_max_points[0].uuid
-    
 
     def initial_deal_adventurer(self):
 
@@ -73,7 +70,7 @@ class Game():
             player.hand.extend(self.adventurer_deck.deal(5))
 
     def initial_deal_landscape(self):
-        
+
         self.landscape.extend(self.dragonwood_deck.deal(5))
 
     def success(self, player, decision):
@@ -92,7 +89,6 @@ class Game():
 
         player.hand = [x for x in player.hand if x not in decision["adventurers"]]
         self.adventurer_deck.discard.extend(decision["adventurers"])
-
 
     def failure(self, player):
         player.discard_card(self.adventurer_deck)
@@ -148,41 +144,39 @@ class Game():
 
     def play(self, debug: bool = False):
 
-            # Shuffle players
-            if self.shuffle_players:
-                shared_random.shuffle(self.players)
+        # Shuffle players
+        if self.shuffle_players:
+            shared_random.shuffle(self.players)
 
-            if not debug:
-                logging.disable()
-            logging.debug('start')
+        if not debug:
+            logging.disable()
+        logging.debug('start')
 
-            decisions = []
+        decisions = []
 
-            while True:
+        while True:
 
-                for player in self.players:
+            for player in self.players:
 
-                    decision = player.decide(self.landscape, self.dice.EV)
-                    decisions.append(self.enact_decision(decision, player))
-                    if self.have_all_game_enders_been_captured:
-                        break
-
-                    if len(player.hand) >9:
-                        player.discard_card(self.adventurer_deck)
-
-                self.turns += 1
-
-                if self.adventurer_deck.number_of_deals > 2:
+                decision = player.decide(self.landscape, self.dice.EV)
+                decisions.append(self.enact_decision(decision, player))
+                if self.have_all_game_enders_been_captured:
                     break
-            
-            self.winner = self.get_winner()
 
-            return {
-                "game_uuid": self.uuid,
-                "winner": self.winner,
-                "turns": self.turns,
-                "decisions": decisions,
-                "players_details": self.get_players_details()
-            }
-        
+                if len(player.hand) > 9:
+                    player.discard_card(self.adventurer_deck)
 
+            self.turns += 1
+
+            if self.adventurer_deck.number_of_deals > 2:
+                break
+
+        self.winner = self.get_winner()
+
+        return {
+            "game_uuid": self.uuid,
+            "winner": self.winner,
+            "turns": self.turns,
+            "decisions": decisions,
+            "players_details": self.get_players_details()
+        }

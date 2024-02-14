@@ -1,5 +1,6 @@
 from Dragonwood.SharedRandom import shared_random
 
+
 class Dice():
 
     def __init__(self, values: list) -> None:

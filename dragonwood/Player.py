@@ -1,4 +1,3 @@
-import select
 import shortuuid
 from collections import Counter
 from itertools import chain
@@ -6,13 +5,14 @@ from itertools import chain
 from Dragonwood.Card import Adventurer_Card, Dragonwood_Card
 from Dragonwood.Deck import Adventurer_Deck
 
+
 class Player():
 
     def __init__(self, risk_level: float, risk_adjustment: float, name: str, card_mask: list[str] = []):
         self.hand = []
         self.uuid = shortuuid.uuid()[:8]
         self.name = name
-        self.risk_level = risk_level 
+        self.risk_level = risk_level
         self.risk_adjustment = risk_adjustment
         self.points = 0
         self.dragonwood_cards = []
@@ -22,16 +22,16 @@ class Player():
         self.card_mask = card_mask
 
     def get_player_details(self) -> dict:
-        
+
         return {
             "player_uuid": self.uuid,
             "name": self.name,
             "points": self.points,
             "risk_level": self.risk_level,
             "risk_adjustment": self.risk_adjustment,
-            "scream_modifier": self.scream_modifier, 
+            "scream_modifier": self.scream_modifier,
             "strike_modifier": self.strike_modifier,
-            "stomp_modifier": self.stomp_modifier,      
+            "stomp_modifier": self.stomp_modifier,
             }
 
     def find_attack_options(self) -> tuple[
@@ -68,17 +68,16 @@ class Player():
                 adventurers_temp.append(next_card)
             else:
                 # reset temp list if no straight
-                adventurers_temp=[next_card]
-            
+                adventurers_temp = [next_card]
+
             # finally if temp list is bigger than actual list copy it over.
-            if len(adventurers_temp)>len(adventurers):
+            if len(adventurers_temp) > len(adventurers):
                 adventurers = adventurers_temp.copy()
-                
 
         # finally return all smaller lists within choices list
         return [adventurers[0:x+1] for x in range(len(adventurers))]
 
-    def find_stomps(self)-> list[list[Adventurer_Card]]:
+    def find_stomps(self) -> list[list[Adventurer_Card]]:
         element_counts = Counter(x.value for x in self.hand)
         max_element, _ = max(element_counts.items(), key=lambda x: x[1])
         adventurers = [x for x in self.hand if x.value == max_element]
@@ -86,11 +85,11 @@ class Player():
         # finally return all smaller lists within choices list
         return [adventurers[0:x+1] for x in range(len(adventurers))]
 
-    def find_screams(self)-> list[list[Adventurer_Card]]:
+    def find_screams(self) -> list[list[Adventurer_Card]]:
         element_counts = Counter(x.suit for x in self.hand)
         max_element, _ = max(element_counts.items(), key=lambda x: x[0])
         adventurers = [x for x in self.hand if x.suit == max_element]
-        
+
         # finally return all smaller lists within choices list
         return [adventurers[0:x+1] for x in range(len(adventurers))]
 
@@ -111,12 +110,10 @@ class Player():
             "decision": selected_option[0],      # strike/stomp/scream
             "card": selected_option[1],          # the card  within the landscape
             "adventurers":  selected_option[2],  # the adventurers used
-            
         }
 
-            
     def get_candidate_decisions(self, landscape: list[Dragonwood_Card], dice_ev: float) -> list[list[Adventurer_Card]]:
-        
+
         attack_options = self.find_attack_options()
         candidate_decisions = []
 
@@ -131,11 +128,11 @@ class Player():
                 threshold = len(attack_option[1]) * (self.risk_level + dice_ev) + getattr(self, f'{attack_option[0]}_modifier') + self.risk_adjustment
                 if threshold > getattr(card, attack_option[0]):
                     candidate_decisions.append([attack_option[0], card, attack_option[1], threshold - getattr(card, attack_option[0])])
-        
+
         return candidate_decisions
-                            
+
     def discard_card(self, adventurer_deck: Adventurer_Deck) -> None:
-        
+
         attack_options = self.find_attack_options()
         # find all cards in choices
 

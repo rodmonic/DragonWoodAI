@@ -5,28 +5,31 @@ sr.set_seed(100)
 
 
 dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
-adventurer_deck = Adventurer_Deck(5,13)
+adventurer_deck = Adventurer_Deck(5, 13)
 player = Player(0, 0, "Alice")
 
 player.hand = adventurer_deck.deal(10)
 landscape = dragonwood_deck.deal(5)
 
+
 def test_find_strikes():
 
     strikes = player.find_strikes()
-    
+
     assert len(strikes) == 4
     assert str(strikes[0]) == "[Adventurer(4:9)]"
 
+
 def test_find_stomps():
-    
+
     stomps = player.find_stomps()
 
     assert len(stomps) == 2
     assert str(stomps[0]) == "[Adventurer(1:2)]"
 
+
 def test_find_screams():
-    
+
     screams = player.find_screams()
 
     assert len(screams) == 4
@@ -46,7 +49,7 @@ def test_decide_on_landscape():
 
 
 def test_discard_card():
-    card = Adventurer_Card(0,1)
+    card = Adventurer_Card(0, 1)
 
     assert card in player.hand
     assert card not in adventurer_deck.discard
