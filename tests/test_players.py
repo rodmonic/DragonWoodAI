@@ -38,7 +38,7 @@ def test_find_screams():
 
 def test_decide_on_landscape():
 
-    decision = player.decide(landscape, 2.5)
+    decision = player.decide_by_rules(landscape, 2.5)
 
     print(player.hand)
     print(landscape)

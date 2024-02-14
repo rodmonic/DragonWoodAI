@@ -34,10 +34,21 @@ class Deck:
 
 
 class Dragonwood_Deck(Deck):
-    def __init__(self, creatures_file_path: str, enchantments_file_path: str, seed: int | None = None) -> None:
+    def __init__(self, creatures_file_path: str, enchantments_file_path: str) -> None:
         Deck.__init__(self)
         self.import_creatures(creatures_file_path)
         self.import_enhancements(enchantments_file_path)
+        self.lookup = self.generate_lookup()
+
+    def generate_lookup(self) -> dict:
+   
+        lookup = {}
+        sorted_unique_name_list = sorted(set([x.name for x in self.cards]))
+
+        for i, card in enumerate(sorted_unique_name_list):
+            lookup[card] = i
+
+        return lookup
 
     def import_creatures(self, filepath: str) -> None:
 
@@ -106,6 +117,8 @@ class Adventurer_Deck(Deck):
         Deck.__init__(self)
         self.generate_adventurer_deck(suits, values)
         self.shuffle()
+        self.suits = suits
+        self.values = values
         self.number_of_deals = 1
 
     def generate_adventurer_deck(self, suits: int, values: int) -> None:

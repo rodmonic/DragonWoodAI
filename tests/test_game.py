@@ -82,9 +82,15 @@ def test_when_tied_the_person_with_the_most_creatures_wins():
 
     assert game.get_winner() == players[1].uuid
 
-# test is game over
+
+def test_game_state():
+    game = Game(adventurer_deck, dragonwood_deck, players, dice)
+
+    _ = game.play(10)
+    
+    game_state = game.get_game_state(players[0])
+
+    assert len(game_state) == 91
 
 
 # test failure
-    
-

@@ -8,7 +8,7 @@ from Dragonwood.Deck import Adventurer_Deck
 
 class Player():
 
-    def __init__(self, risk_level: float, risk_adjustment: float, name: str, card_mask: list[str] = []):
+    def __init__(self, risk_level: float, risk_adjustment: float, name: str, card_mask: list[str] = [], is_robot: bool = False, ):
         self.hand = []
         self.uuid = shortuuid.uuid()[:8]
         self.name = name
@@ -20,6 +20,7 @@ class Player():
         self.stomp_modifier = 0
         self.scream_modifier = 0
         self.card_mask = card_mask
+        self.is_robot = is_robot
 
     def get_player_details(self) -> dict:
 
@@ -93,7 +94,7 @@ class Player():
         # finally return all smaller lists within choices list
         return [adventurers[0:x+1] for x in range(len(adventurers))]
 
-    def decide(self, landscape: list[Dragonwood_Card], dice_ev: float) -> dict:
+    def decide_by_rules(self, landscape: list[Dragonwood_Card], dice_ev: float) -> dict:
 
         if not self.hand:
             return {"decision": "reload"}
@@ -111,6 +112,7 @@ class Player():
             "card": selected_option[1],          # the card  within the landscape
             "adventurers":  selected_option[2],  # the adventurers used
         }
+    
 
     def get_candidate_decisions(self, landscape: list[Dragonwood_Card], dice_ev: float) -> list[list[Adventurer_Card]]:
 

@@ -59,3 +59,12 @@ def test_adventure_deck_redeal():
     assert len(adventurer_deck.cards) == 55
     assert len(adventurer_deck.discard) == 0
     assert adventurer_deck.number_of_deals == 2
+
+
+def test_dragonwood_card_lookup():
+
+    dragonwood_deck_lookup = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
+    dw_lookup = dragonwood_deck_lookup.generate_lookup()
+
+    assert len(dw_lookup) == 21
+    assert dw_lookup['Giggling Goblin'] == 9

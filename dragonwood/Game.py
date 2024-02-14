@@ -134,15 +134,15 @@ class Game():
 
         return decision_detail
 
-    def have_all_game_enders_been_captured(self) -> bool:
+    def get_number_of_games_enders(self) -> bool:
 
         # check if all the game ending cards have been captured and if so then break while loop
         remaining_DW_cards = itertools.chain(self.dragonwood_deck.cards, self.landscape)
         game_ending_cards = sum([x.game_ender for x in remaining_DW_cards if type(x) is Creature])
 
-        return game_ending_cards == 0
+        return game_ending_cards
 
-    def play(self, debug: bool = False):
+    def play(self, turns_limit: int = 99999, debug: bool = False):
 
         # Shuffle players
         if self.shuffle_players:
@@ -157,16 +157,21 @@ class Game():
         while True:
 
             for player in self.players:
-
-                decision = player.decide(self.landscape, self.dice.EV)
+                if player.is_robot:
+                    decision = player.decide_by_nn(self.landscape)
+                else:
+                    decision = player.decide_by_rules(self.landscape, self.dice.EV)
                 decisions.append(self.enact_decision(decision, player))
-                if self.have_all_game_enders_been_captured:
+                if self.get_number_of_games_enders() == 0:
                     break
 
                 if len(player.hand) > 9:
                     player.discard_card(self.adventurer_deck)
 
             self.turns += 1
+
+            if turns_limit >= self.turns:
+                break
 
             if self.adventurer_deck.number_of_deals > 2:
                 break
@@ -180,3 +185,38 @@ class Game():
             "decisions": decisions,
             "players_details": self.get_players_details()
         }
+
+    def get_game_state(self, player: Player) -> list[float]:
+
+        encoded_hand = self.get_encoded_player_hand(player)
+        encoded_landscape = self.get_encoded_landscape()
+        player_points = [x.points for x in self.players]
+        number_of_game_enders = [self.get_number_of_games_enders()]
+
+        state = list(
+            itertools.chain(
+                encoded_hand,
+                encoded_landscape,
+                player_points,
+                number_of_game_enders
+            )
+            )
+
+        return state
+
+    def get_encoded_player_hand(self, player: Player) -> list[int]:
+
+        suits = self.adventurer_deck.suits
+        values = self.adventurer_deck.values
+        players_hand_one_hot_encoded = [0] * (suits * values)
+        for card in player.hand:
+            players_hand_one_hot_encoded[values*card.suit + card.value] = 1
+
+        return players_hand_one_hot_encoded
+
+    def get_encoded_landscape(self) -> list[int]:
+        landscape_one_hot_encoded = [0] * len(self.dragonwood_deck.lookup)
+        for card in self.landscape:
+            landscape_one_hot_encoded[self.dragonwood_deck.lookup[card.name]] = 1
+        
+        return landscape_one_hot_encoded
