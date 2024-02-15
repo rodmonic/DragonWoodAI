@@ -15,7 +15,7 @@ def model_games():
 
         config = {
             "adventurer_suits": 5,
-            "adventurer_values": 13,
+            "adventurer_values": 12,
             "dice_values": [1, 2, 2, 3, 3, 4],
             "number_of_players": i,
             "shuffle_players": False,
