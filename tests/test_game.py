@@ -1,12 +1,12 @@
+from sklearn.linear_model import GammaRegressor
 from Dragonwood.Game import Game
-from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck, Creature
+from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck, Creature, Adventurer_Card
 from Dragonwood.Player import Player
 from Dragonwood.Dice import Dice
 import Dragonwood.SharedRandom as sr
-sr.set_seed(100)
 
 dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
-adventurer_deck = Adventurer_Deck(5, 13)
+adventurer_deck = Adventurer_Deck(5, 12)
 dice = Dice([1, 2, 2, 3, 3, 4])
 players = [
             Player(0.5, -0.1, dice, "Alice"),
@@ -90,7 +90,42 @@ def test_game_state():
     
     game_state = game.get_game_state(players[0])
 
-    assert len(game_state) == 91
+    assert len(game_state) == 86
+
+def test_game_state_adventurer_encoding():
+
+    game = Game(adventurer_deck, dragonwood_deck, players, dice)
+
+    _ = game.play(10)
+    
+    hand = [Adventurer_Card(0,0), Adventurer_Card(0,1), Adventurer_Card(2,11), Adventurer_Card(4,11)]
+    
+
+
+    players[0].hand = hand
+
+    game_state = game.get_game_state(players[0])
+
+    assert game_state[0] == 1
+    assert game_state[1] == 1
+    assert game_state[(2*12)+11] == 1
+    assert game_state[(4*12)+11] == 1
+
+def test_game_state_creature_ecoding():
+
+    sr.set_seed(100)
+
+    dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
+
+    dragonwood_deck.cards[0]
+
+    game = Game(adventurer_deck, dragonwood_deck, players, dice)
+
+    game_state = game.get_game_state(players[0])
+
+    assert game_state[60+11] == 1
+    assert game_state[60+9] == 1
+    assert game_state[60+12] == 1
 
 
 # test failure
