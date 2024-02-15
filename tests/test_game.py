@@ -1,4 +1,3 @@
-from sklearn.linear_model import GammaRegressor
 from Dragonwood.Game import Game
 from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck, Creature, Adventurer_Card
 from Dragonwood.Player import Player
