@@ -1,0 +1,17 @@
+# requirements.txt
+
+colorama==0.4.6
+iniconfig==2.0.0
+more-itertools==10.2.0
+neat-python==0.92
+numpy==1.26.4
+packaging==23.2
+pandas==2.2.0
+pluggy==1.4.0
+pytest==8.0.0
+python-dateutil==2.8.2
+pytz==2024.1
+shortuuid==1.0.11
+six==1.16.0
+tqdm==4.66.2
+tzdata==2024.1
