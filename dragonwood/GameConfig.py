@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from doctest import debug
 from typing import Callable
 
 from tqdm import tqdm
@@ -27,6 +28,8 @@ class GameConfig():
     powerset_card_mask: bool = False
     shuffle_players: bool = True
     attack_selection_fuction: Callable|None = None
+    debug: bool = False
+
 
     def Run(self):
         decisions = []
@@ -66,7 +69,7 @@ class GameConfig():
                                 ))
                         
                         game = Game(adventurer_deck, dragonwood_deck, players, dice, self.shuffle_players)
-                        result = game.play()
+                        result = game.play(self.debug)
                         decisions.extend(result["decisions"])
                         player_details.extend(result["players_details"])
                         games.append({

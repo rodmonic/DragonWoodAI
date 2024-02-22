@@ -24,7 +24,8 @@ def model_games():
             "range_of_risk_adjustement": range_of_risk_adjustement,
             "seed": 100,
             "creature_filepath": "./cards/creatures.csv",
-            "enhancement_filepath": "./cards/enhancements.csv"
+            "enhancement_filepath": "./cards/enhancements.csv",
+            "debug": True
         }
 
         gameconfig = GameConfig(**config)

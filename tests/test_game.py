@@ -84,31 +84,27 @@ def test_when_tied_the_person_with_the_most_creatures_wins():
 
 def test_game_state():
     game = Game(adventurer_deck, dragonwood_deck, players, dice)
-
-    _ = game.play(10)
     
-    game_state = game.get_game_state(players[0])
+    attack_option = [Adventurer_Card(0,0), Adventurer_Card(0,1), Adventurer_Card(2,11), Adventurer_Card(4,11)]
+
+    game_state = game.get_attack_option_game_state(attack_option,dragonwood_deck.cards[1], [attack_option[1]])
 
     assert len(game_state) == 86
 
 def test_game_state_adventurer_encoding():
-
+    dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
+    
     game = Game(adventurer_deck, dragonwood_deck, players, dice)
 
-    _ = game.play(10)
-    
-    hand = [Adventurer_Card(0,0), Adventurer_Card(0,1), Adventurer_Card(2,11), Adventurer_Card(4,11)]
-    
+    attack_option = [Adventurer_Card(0,0), Adventurer_Card(0,1), Adventurer_Card(2,11), Adventurer_Card(4,11)]
 
 
-    players[0].hand = hand
+    game_state = game.get_attack_option_game_state(attack_option,dragonwood_deck.cards[1], [attack_option[1]])
 
-    game_state = game.get_game_state(players[0])
-
-    assert game_state[0] == 1
-    assert game_state[1] == 1
-    assert game_state[(2*12)+11] == 1
-    assert game_state[(4*12)+11] == 1
+    assert game_state[0] == 0.5
+    assert game_state[1] == 1.0
+    assert game_state[(2*12)+11] == 0.5
+    assert game_state[(4*12)+11] == 0.5
 
 def test_game_state_creature_ecoding():
 
@@ -120,11 +116,13 @@ def test_game_state_creature_ecoding():
 
     game = Game(adventurer_deck, dragonwood_deck, players, dice)
 
-    game_state = game.get_game_state(players[0])
+    attack_option = [Adventurer_Card(0,0), Adventurer_Card(0,1), Adventurer_Card(2,11), Adventurer_Card(4,11)]
 
-    assert game_state[60+11] == 1
-    assert game_state[60+9] == 1
-    assert game_state[60+12] == 1
+    game_state = game.get_attack_option_game_state(attack_option,dragonwood_deck.cards[1], [attack_option[1]])
+
+    assert game_state[60+6] == 0.5
+    assert game_state[60+9] == 1.0
+    assert game_state[60+16] == 0.5
 
 
 # test failure

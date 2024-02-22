@@ -1,6 +1,7 @@
 import shortuuid
 from collections import Counter
 from itertools import chain
+from neat.nn import FeedForwardNetwork
 
 from Dragonwood.Card import Adventurer_Card, Dragonwood_Card
 from Dragonwood.Deck import Adventurer_Deck
@@ -21,6 +22,7 @@ class Player():
         self.scream_modifier = 0
         self.card_mask = card_mask
         self.is_robot = is_robot
+        self.fitness = 0
 
     def get_player_details(self) -> dict:
 
@@ -94,12 +96,9 @@ class Player():
         # finally return all smaller lists within choices list
         return [adventurers[0:x+1] for x in range(len(adventurers))]
 
-    def decide_by_rules(self, landscape: list[Dragonwood_Card], dice_ev: float) -> dict:
+    def decide_by_rules(self, landscape: list[Dragonwood_Card], dice_ev: float, attack_options) -> dict:
 
-        if not self.hand:
-            return {"decision": "reload"}
-
-        candidate_decisions = self.get_candidate_decisions(landscape, dice_ev)
+        candidate_decisions = self.get_candidate_decisions(landscape, dice_ev, attack_options)
 
         if not candidate_decisions:
             return {"decision": "reload"}
@@ -112,11 +111,9 @@ class Player():
             "card": selected_option[1],          # the card  within the landscape
             "adventurers":  selected_option[2],  # the adventurers used
         }
-    
 
-    def get_candidate_decisions(self, landscape: list[Dragonwood_Card], dice_ev: float) -> list[list[Adventurer_Card]]:
+    def get_candidate_decisions(self, landscape: list[Dragonwood_Card], dice_ev: float, attack_options) -> list[list[Adventurer_Card]]:
 
-        attack_options = self.find_attack_options()
         candidate_decisions = []
 
         for card in landscape:

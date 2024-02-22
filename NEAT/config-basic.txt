@@ -1,0 +1,16 @@
+[NEAT]
+fitness_criterion     = max
+fitness_threshold     = 40
+pop_size              = 150
+reset_on_extinction   = False
+
+[DefaultGenome]
+# node activation options
+activation_default      = sigmoid
+activation_mutate_rate  = 0.1
+activation_options      = sigmoid tanh relu
+
+# network parameters
+num_hidden              = 0
+num_inputs              = 86
+num_outputs             = 1

@@ -1,4 +1,8 @@
+
 from Dragonwood.GameConfig import GameConfig
+from Dragonwood.SharedRandom import set_seed
+
+set_seed()
 
 
 def main():

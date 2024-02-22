@@ -1,14 +1,17 @@
 from typing import List
 import itertools
 import logging
+import time
+from uu import encode
 import shortuuid
-from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck
+from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck, Adventurer_Card
 from Dragonwood.Player import Player
-from Dragonwood.Card import Creature, Enhancement
+from Dragonwood.Card import Creature, Dragonwood_Card, Enhancement
 from Dragonwood.Dice import Dice
+from neat.nn import FeedForwardNetwork
 from Dragonwood.SharedRandom import shared_random
 
-logging.basicConfig(filename='dragonwood.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename=f'./data/logging/{time.strftime("%Y%m%d-%H%M%S")}.log', encoding='utf-8', level=logging.DEBUG)
 
 
 class Game():
@@ -20,11 +23,14 @@ class Game():
         self.uuid = shortuuid.uuid()[:8]
         self.turns = 1
         self.landscape = []
+        self.adventurer_deck.shuffle()
+        self.dragonwood_deck.shuffle()
         self.initial_deal_adventurer()
         self.initial_deal_landscape()
         self.dragonwood_deck.initial_config(len(self.players))
         self.winner = ''
         self.shuffle_players = shuffle_players
+
 
     def __repr__(self) -> str:
 
@@ -79,14 +85,16 @@ class Game():
 
         if type(dw_card) is Creature:
             player.points += decision["card"].points
-            self.landscape.extend(self.dragonwood_deck.deal(1))
+            player.fitness += decision["card"].points
         elif type(dw_card) is Enhancement:
             for modification in dw_card.modifications:
                 current_value = getattr(player, modification)
                 setattr(player, modification, dw_card.modifier + current_value)
 
-        self.landscape.remove(decision["card"])
 
+        self.landscape.remove(decision["card"])
+        self.landscape.extend(self.dragonwood_deck.deal(1))
+        
         player.hand = [x for x in player.hand if x not in decision["adventurers"]]
         self.adventurer_deck.discard.extend(decision["adventurers"])
 
@@ -107,7 +115,9 @@ class Game():
             }
 
             player.hand.extend(self.adventurer_deck.deal(1))
-            logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
+            if player.is_robot:
+                # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
+                logging.debug(f'RELOAD-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{player.hand}- - - ')
         else:
             dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
             modifiers = getattr(player, decision["decision"] + "_modifier")
@@ -121,14 +131,17 @@ class Game():
                     "dice_roll": dice_roll,
                     "player_points": player.points
                     }
-
+            #player.fitness += (dice_roll - getattr(decision["card"], decision["decision"]))
             if (dice_roll + modifiers) >= getattr(decision["card"], decision["decision"]):
-                logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-SUCCESS')
+                if player.is_robot:
+                    # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-SUCCESS')
+                    logging.debug(f'SUCCESS-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{decision["adventurers"]}-{decision["card"]}-{player.hand}-{dice_roll + modifiers}')
                 decision_detail["outcome"] = "SUCCESS"
                 self.success(player, decision)
-
             else:
-                logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-FAILURE')
+                if player.is_robot:
+                    # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-FAILURE')
+                    logging.debug(f'FAILURE-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{decision["adventurers"]}-{decision["card"]}-{player.hand}-{dice_roll + modifiers}')
                 decision_detail["outcome"] = "FAILURE"
                 self.failure(player)
 
@@ -142,7 +155,7 @@ class Game():
 
         return game_ending_cards
 
-    def play(self, turns_limit: int = 99999, debug: bool = False):
+    def play(self, net: FeedForwardNetwork=None, debug: bool = False):
 
         # Shuffle players
         if self.shuffle_players:
@@ -157,11 +170,18 @@ class Game():
         while True:
 
             for player in self.players:
-                if player.is_robot:
-                    decision = player.decide_by_nn(self.landscape)
+
+                if not player.hand:
+                    decision = {"decision": "reload"}
                 else:
-                    decision = player.decide_by_rules(self.landscape, self.dice.EV)
+                    attack_options = player.find_attack_options()
+                    if player.is_robot:
+                        decision = self.decide_by_nn(attack_options, net, player)
+                    else:
+                        decision = player.decide_by_rules(self.landscape, self.dice.EV, attack_options)
+
                 decisions.append(self.enact_decision(decision, player))
+
                 if self.get_number_of_games_enders() == 0:
                     break
 
@@ -170,10 +190,7 @@ class Game():
 
             self.turns += 1
 
-            if turns_limit >= self.turns:
-                break
-
-            if self.adventurer_deck.number_of_deals > 2:
+            if self.adventurer_deck.number_of_deals > 2 or self.get_number_of_games_enders() == 0:
                 break
 
         self.winner = self.get_winner()
@@ -186,16 +203,16 @@ class Game():
             "players_details": self.get_players_details()
         }
 
-    def get_game_state(self, player: Player) -> list[float]:
+    def get_attack_option_game_state(self, attack_option: list[Adventurer_Card], dragonwood_card: Dragonwood_Card, hand: list[Adventurer_Card]) -> list[float]:
 
-        encoded_hand = self.get_encoded_player_hand(player)
-        encoded_landscape = self.get_encoded_landscape()
-        player_points = [x.points for x in self.players]
-        number_of_game_enders = [self.get_number_of_games_enders()]
+        encoded_attack_option= self.get_encoded_attack_option(attack_option, hand)
+        encoded_landscape = self.get_encoded_landscape(dragonwood_card)
+        player_points = [x.points/50 for x in self.players]
+        number_of_game_enders = [self.get_number_of_games_enders()/2]
 
         state = list(
             itertools.chain(
-                encoded_hand,
+                encoded_attack_option,
                 encoded_landscape,
                 player_points,
                 number_of_game_enders
@@ -204,19 +221,54 @@ class Game():
 
         return state
 
-    def get_encoded_player_hand(self, player: Player) -> list[int]:
+    def get_encoded_attack_option(self, attack_option: list[Adventurer_Card], hand: list[Adventurer_Card]) -> list[int]:
 
         suits = self.adventurer_deck.suits
         values = self.adventurer_deck.values
-        players_hand_one_hot_encoded = [0] * (suits * values)
-        for card in player.hand:
-            players_hand_one_hot_encoded[values*card.suit + card.value] = 1
+        attack_option_encoded = [0.0] * (suits * values)
 
-        return players_hand_one_hot_encoded
-
-    def get_encoded_landscape(self) -> list[int]:
-        landscape_one_hot_encoded = [0] * len(self.dragonwood_deck.lookup)
-        for card in self.landscape:
-            landscape_one_hot_encoded[self.dragonwood_deck.lookup[card.name]] = 1
+        cards = list(itertools.chain(attack_option, hand))
         
-        return landscape_one_hot_encoded
+        for card in cards:
+            attack_option_encoded[values*card.suit + card.value] += 0.5
+
+
+
+        return attack_option_encoded
+
+    def get_encoded_landscape(self, dragonwood_card: Dragonwood_Card ) -> list[int]:
+        landscape_encoded = [0.0] * len(self.dragonwood_deck.lookup)
+
+        cards = list(itertools.chain(self.landscape, [dragonwood_card]))
+
+        for card in cards:
+            landscape_encoded[self.dragonwood_deck.lookup[card.name]] += 0.5
+
+        return landscape_encoded
+
+    def decide_by_nn(self, attack_options: list[list[Adventurer_Card]], net: FeedForwardNetwork, player: Player) -> dict:
+        
+        index_of_highest_score = 0
+        highest_score = float('-inf')
+        selected_card = 0
+
+        for card in self.landscape:
+            for index, attack_option in enumerate(attack_options):
+                encoded_option = self.get_attack_option_game_state(attack_option[1], card, player.hand)
+                option_score = net.activate(encoded_option)[0]
+                if option_score > highest_score:
+                    highest_score = option_score
+                    index_of_highest_score = index
+                    selected_card = card
+
+        if highest_score <= 0.5:
+            selected_decision = {"decision": "reload"}
+        else:
+            selected_decision = {
+            "decision": attack_options[index_of_highest_score][0],      # strike/stomp/scream
+            "card": selected_card,                                      # the card  within the landscape
+            "adventurers":  attack_options[index_of_highest_score][1],  # the adventurers used
+        }
+        
+
+        return selected_decision
