@@ -57,7 +57,7 @@ def run_neat(config_file):
                          config_file)
 
     # p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-9')
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-58')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)

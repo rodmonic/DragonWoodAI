@@ -59,7 +59,7 @@ Population of 20 members in 1 species:
      1   12    20      3.1    0.492     1
 Total extinctions: 0
 Generation time: 431.918 sec (425.567 average)
-
+ 
 ## next encoding
 
 62 neurons to model the current hand, 1 if the player has that card and 2 if it's part of the attack option
