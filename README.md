@@ -68,3 +68,32 @@ Generation time: 431.918 sec (425.567 average)
 1 neuron for the number of game ender cards still out there 
 
 but all normalised to [0,1]
+
+Managed to get around 7 fitness after 60 generations
+
+
+
+## adjusted fitness function
+
+Added negative -0.5 for each impossible card and adventurer combination the model chooses.
+
+## adjusted config
+
+Have the mean as the fitness function instead of Max
+Experiment 3
+ ****** Running generation 113 ******
+
+Population's average fitness: 3.09993 stdev: 2.53612
+Best fitness: 6.70325 - size: (2, 73) - species 1 - id 13201
+Average adjusted fitness: 0.742
+Mean genetic distance 1.695, standard deviation 0.326
+Population of 150 members in 2 species:
+   ID   age  size  fitness  adj fit  stag
+  ====  ===  ====  =======  =======  ====
+     1  113    79      3.6    0.774    43
+     4   64    71      2.7    0.710    40
+Total extinctions: 0
+Generation time: 1231.696 sec (1207.355 average)
+Saving checkpoint to neat-checkpoint-113
+
+Noticed that the AI is reloading a lot so may need to adjust the probablity that triggers a reload.

@@ -19,7 +19,7 @@ iterations = 100
 
 def evaluate_genome(genomes, config):
     player_details = []
-    for genome_id, genome in tqdm(genomes):
+    for _, genome in tqdm(genomes):
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         fitness = 0
         for _ in range(iterations):
@@ -42,7 +42,7 @@ def evaluate_genome(genomes, config):
             
             result = game.play(
                 net=net,
-                debug=False
+                debug=True
             )
 
             player_details.extend(result["players_details"])
@@ -62,12 +62,11 @@ def run_neat(config_file):
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
 
-    p = neat.Population(config)
+    #p = neat.Population(config)
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-10')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    checkpointer = neat.Checkpointer(100, 10, './data/NEAT/Checkpoint-')
-    p.add_reporter(checkpointer)
     winner = p.run(evaluate_genome, generations)
 
 

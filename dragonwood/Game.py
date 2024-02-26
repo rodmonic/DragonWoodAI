@@ -122,6 +122,11 @@ class Game():
             dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
             modifiers = getattr(player, decision["decision"] + "_modifier")
 
+            # check if it is a "bad decsision" (i.e. impossible for the AI to win that card) 
+            # and then punish them by reducing the fitness:
+            if len(decision["adventurers"])*4 + modifiers < getattr(decision["card"], decision["decision"]):
+                player.fitness += -0.5
+
             decision_detail = {
                     "game_uuid": self.uuid,
                     "turn": self.turns,
