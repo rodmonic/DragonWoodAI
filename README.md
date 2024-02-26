@@ -80,7 +80,7 @@ Added negative -0.5 for each impossible card and adventurer combination the mode
 ## adjusted config
 
 Have the mean as the fitness function instead of Max
-Experiment 3
+### Experiment 3
  ****** Running generation 113 ******
 
 Population's average fitness: 3.09993 stdev: 2.53612
@@ -97,3 +97,12 @@ Generation time: 1231.696 sec (1207.355 average)
 Saving checkpoint to neat-checkpoint-113
 
 Noticed that the AI is reloading a lot so may need to adjust the probablity that triggers a reload.
+
+### Experiment 4
+changed the cut off for a reload decision to 0.33 as in the logs the AI seemed to be reloading a lot.
+
+
+### Noticed an error in my encoding 
+- that would allow over 1 for a landsacpe with the same card in twice
+- order of players scores were shuffled each time so was effectively adding confusion into the network.
+- also added in 10 more fitness points if they actaully win.

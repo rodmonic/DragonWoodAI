@@ -1,3 +1,4 @@
+from importlib.machinery import WindowsRegistryFinder
 from typing import List
 import itertools
 import logging
@@ -62,7 +63,7 @@ class Game():
         for player in self.players:
             if player.uuid in players_uuids_with_max_creatures:
                 player.points += point_modifier
-
+                
         max_points = max([x.points for x in self.players])
         players_with_max_points = [player for player in self.players if player.points == max_points]
         sorted_players_with_max_points = sorted(players_with_max_points, key=lambda x: len(x.dragonwood_cards), reverse=True)
@@ -117,7 +118,7 @@ class Game():
             player.hand.extend(self.adventurer_deck.deal(1))
             if player.is_robot:
                 # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
-                logging.debug(f'RELOAD-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{player.hand}- - - ')
+                logging.debug(f'RELOAD-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}- - -{self.landscape}- -{player.hand}')
         else:
             dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
             modifiers = getattr(player, decision["decision"] + "_modifier")
@@ -140,13 +141,13 @@ class Game():
             if (dice_roll + modifiers) >= getattr(decision["card"], decision["decision"]):
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-SUCCESS')
-                    logging.debug(f'SUCCESS-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{decision["adventurers"]}-{decision["card"]}-{player.hand}-{dice_roll + modifiers}')
+                    logging.debug(f'SUCCESS-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{decision["card"]}-{dice_roll + modifiers}-{self.landscape}-{decision["adventurers"]}-{player.hand}')
                 decision_detail["outcome"] = "SUCCESS"
                 self.success(player, decision)
             else:
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-FAILURE')
-                    logging.debug(f'FAILURE-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{decision["adventurers"]}-{decision["card"]}-{player.hand}-{dice_roll + modifiers}')
+                    logging.debug(f'FAILURE-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{decision["card"]}-{player.hand}')
                 decision_detail["outcome"] = "FAILURE"
                 self.failure(player)
 
@@ -200,6 +201,10 @@ class Game():
 
         self.winner = self.get_winner()
 
+        for robot_player in [x for x in self.players if x.is_robot]:
+            if robot_player.id == self.winner:
+                robot_player.fitness += 10.0
+
         return {
             "game_uuid": self.uuid,
             "winner": self.winner,
@@ -212,7 +217,7 @@ class Game():
 
         encoded_attack_option= self.get_encoded_attack_option(attack_option, hand)
         encoded_landscape = self.get_encoded_landscape(dragonwood_card)
-        player_points = [x.points/50 for x in self.players]
+        player_points = [x.points/50 for x in sorted(self.players, key=lambda obj: obj.name)]
         number_of_game_enders = [self.get_number_of_games_enders()/2]
 
         state = list(
@@ -244,10 +249,10 @@ class Game():
     def get_encoded_landscape(self, dragonwood_card: Dragonwood_Card ) -> list[int]:
         landscape_encoded = [0.0] * len(self.dragonwood_deck.lookup)
 
-        cards = list(itertools.chain(self.landscape, [dragonwood_card]))
+        for card in set(self.landscape):
+            landscape_encoded[self.dragonwood_deck.lookup[card.name]] = 0.5
 
-        for card in cards:
-            landscape_encoded[self.dragonwood_deck.lookup[card.name]] += 0.5
+        landscape_encoded[self.dragonwood_deck.lookup[dragonwood_card.name]] = 1.0
 
         return landscape_encoded
 
@@ -266,7 +271,7 @@ class Game():
                     index_of_highest_score = index
                     selected_card = card
 
-        if highest_score <= 0.5:
+        if highest_score <= 0.33:
             selected_decision = {"decision": "reload"}
         else:
             selected_decision = {
