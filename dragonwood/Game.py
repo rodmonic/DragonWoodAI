@@ -202,7 +202,7 @@ class Game():
         self.winner = self.get_winner()
 
         for robot_player in [x for x in self.players if x.is_robot]:
-            if robot_player.id == self.winner:
+            if robot_player.uuid == self.winner:
                 robot_player.fitness += 10.0
 
         return {
