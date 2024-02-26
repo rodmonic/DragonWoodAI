@@ -1,6 +1,5 @@
 import neat
 import os
-import pickle
 
 import pandas as pd
 
@@ -14,8 +13,8 @@ import Dragonwood.SharedRandom as sr
 
 sr.set_seed()
 
-generations = 1000
-iterations = 100
+generations = 1
+iterations = 2000
 
 def evaluate_genome(genomes, config):
     player_details = []
@@ -63,7 +62,7 @@ def run_neat(config_file):
                          config_file)
 
     #p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-10')
+    p = neat.Checkpointer.restore_checkpoint('./experiments/experiment-3-checkpoint-113')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
@@ -73,5 +72,5 @@ def run_neat(config_file):
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, "./NEAT/config-feedforward.txt")
+    config_path = os.path.join(local_dir, "./NEAT/config-single.txt")
     run_neat(config_path)
