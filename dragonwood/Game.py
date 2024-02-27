@@ -118,7 +118,7 @@ class Game():
             player.hand.extend(self.adventurer_deck.deal(1))
             if player.is_robot:
                 # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
-                logging.debug(f'RELOAD-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}- - -{self.landscape}- -{player.hand}')
+                logging.debug(f'RELOAD-Turn {self.turns}-{player.name}-{player.points}-{player.fitness}-{decision["decision"]}- - -{self.landscape}- -{player.hand}')
         else:
             dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
             modifiers = getattr(player, decision["decision"] + "_modifier")
@@ -141,19 +141,19 @@ class Game():
             if (dice_roll + modifiers) >= getattr(decision["card"], decision["decision"]):
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-SUCCESS')
-                    logging.debug(f'SUCCESS-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{decision["card"]}-{dice_roll + modifiers}-{self.landscape}-{decision["adventurers"]}-{player.hand}')
+                    logging.debug(f'SUCCESS-Turn {self.turns}-{player.name}-{player.points}--{player.fitness}-{decision["decision"]}-{dice_roll + modifiers}-{decision["card"]}-{self.landscape}-{decision["adventurers"]}-{player.hand}')
                 decision_detail["outcome"] = "SUCCESS"
                 self.success(player, decision)
             else:
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-FAILURE')
-                    logging.debug(f'FAILURE-Turn {self.turns}-{player.name}-{player.points}-{decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{decision["card"]}-{player.hand}')
+                    logging.debug(f'FAILURE-Turn {self.turns}-{player.name}-{player.points}-{player.fitness}-{decision["decision"]}-{dice_roll + modifiers}-{decision["card"]}-{self.landscape}-{decision["adventurers"]}-{player.hand}')
                 decision_detail["outcome"] = "FAILURE"
                 self.failure(player)
 
         return decision_detail
 
-    def get_number_of_games_enders(self) -> bool:
+    def get_number_of_games_enders(self) -> int:
 
         # check if all the game ending cards have been captured and if so then break while loop
         remaining_DW_cards = itertools.chain(self.dragonwood_deck.cards, self.landscape)
@@ -242,8 +242,6 @@ class Game():
         for card in cards:
             attack_option_encoded[values*card.suit + card.value] += 0.5
 
-
-
         return attack_option_encoded
 
     def get_encoded_landscape(self, dragonwood_card: Dragonwood_Card ) -> list[int]:
@@ -273,6 +271,9 @@ class Game():
 
         if highest_score <= 0.33:
             selected_decision = {"decision": "reload"}
+            # if drawing a card would result in discarding a card reduce thier fitness score
+            if len(player.hand)==9:
+                player.fitness += -0.25
         else:
             selected_decision = {
             "decision": attack_options[index_of_highest_score][0],      # strike/stomp/scream
