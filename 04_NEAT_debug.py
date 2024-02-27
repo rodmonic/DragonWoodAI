@@ -13,8 +13,8 @@ import Dragonwood.SharedRandom as sr
 
 sr.set_seed()
 
-generations = 1
-iterations = 2000
+generations = 1000
+iterations = 100
 
 def evaluate_genome(genomes, config):
     player_details = []
@@ -52,8 +52,8 @@ def evaluate_genome(genomes, config):
 
         genome.fitness = fitness/iterations
     
-    df = pd.DataFrame.from_dict(player_details)
-    df.to_csv(f'./data/NEAT/player_details.csv')
+    # df = pd.DataFrame.from_dict(player_details)
+    # df.to_csv(f'./data/NEAT/player_details.csv')
 
 
 def run_neat(config_file):
@@ -62,7 +62,7 @@ def run_neat(config_file):
                          config_file)
 
     #p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('./experiments/experiment-3-checkpoint-113')
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-69')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
@@ -72,5 +72,5 @@ def run_neat(config_file):
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, "./NEAT/config-single.txt")
+    config_path = os.path.join(local_dir, "./NEAT/config-debug.txt")
     run_neat(config_path)

@@ -106,3 +106,8 @@ changed the cut off for a reload decision to 0.33 as in the logs the AI seemed t
 - that would allow over 1 for a landsacpe with the same card in twice
 - order of players scores were shuffled each time so was effectively adding confusion into the network.
 - also added in 10 more fitness points if they actaully win.
+
+got to ~7 max fitness by 70 but then stryggled.
+
+### Experiment 5
+added a negative 0.25 fitness penalty for drawing a card when it would result in losing a card.
