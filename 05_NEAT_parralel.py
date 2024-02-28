@@ -5,7 +5,6 @@ import multiprocessing
 
 from numpy import average
 
-
 from Dragonwood.Game import Game
 from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck
 from Dragonwood.Player import Player
@@ -45,7 +44,7 @@ def eval_genome(genome, config):
         )
 
         # Determine the fitness score based on the outcome of the game
-        fitness_of_players_that_are_robots = [x.fitness for x in players if x.is_robot]
+        fitness_of_players_that_are_robots = [(x.points/x.adventure_cards_used)+x.fitness for x in players if x.is_robot]
         fitness += average(fitness_of_players_that_are_robots)
 
     return fitness/iterations
@@ -58,8 +57,8 @@ def run_neat(config_file):
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
 
-    # p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-49')
+    p = neat.Population(config)
+    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-49')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)

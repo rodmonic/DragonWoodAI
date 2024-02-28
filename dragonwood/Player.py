@@ -23,6 +23,7 @@ class Player():
         self.card_mask = card_mask
         self.is_robot = is_robot
         self.fitness = 0
+        self.adventure_cards_used = 5
 
     def get_player_details(self) -> dict:
 
@@ -134,6 +135,8 @@ class Player():
 
         attack_options = self.find_attack_options()
         # find all cards in choices
+
+        self.adventure_cards_used += 1
 
         card_list = list(chain.from_iterable([x[1] for x in attack_options]))
         all_attack_option_cards = set(card_list)
