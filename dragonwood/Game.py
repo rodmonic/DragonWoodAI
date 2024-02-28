@@ -86,7 +86,6 @@ class Game():
 
         if type(dw_card) is Creature:
             player.points += decision["card"].points
-            player.fitness += decision["card"].points
         elif type(dw_card) is Enhancement:
             for modification in dw_card.modifications:
                 current_value = getattr(player, modification)
@@ -98,6 +97,7 @@ class Game():
         
         player.hand = [x for x in player.hand if x not in decision["adventurers"]]
         self.adventurer_deck.discard.extend(decision["adventurers"])
+        player.adventure_cards_used += len(decision["adventurers"])
 
     def failure(self, player):
         player.discard_card(self.adventurer_deck)
@@ -114,18 +114,17 @@ class Game():
                 "outcome": "RELOAD",
                 "player_points": player.points
             }
-
             player.hand.extend(self.adventurer_deck.deal(1))
             if player.is_robot:
                 # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
-                logging.debug(f'RELOAD-Turn {self.turns}-{player.name}-{player.points}-{player.fitness}-{decision["decision"]}- - -{self.landscape}- -{player.hand}')
+                logging.debug(f'RELOAD|Turn {self.turns}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|||{self.landscape}||{player.hand}')
         else:
             dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
             modifiers = getattr(player, decision["decision"] + "_modifier")
 
             # check if it is a "bad decsision" (i.e. impossible for the AI to win that card) 
             # and then punish them by reducing the fitness:
-            if len(decision["adventurers"])*4 + modifiers < getattr(decision["card"], decision["decision"]):
+            if (len(decision["adventurers"])*4 + modifiers) < (getattr(decision["card"], decision["decision"])):
                 player.fitness += -0.5
 
             decision_detail = {
@@ -141,13 +140,13 @@ class Game():
             if (dice_roll + modifiers) >= getattr(decision["card"], decision["decision"]):
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-SUCCESS')
-                    logging.debug(f'SUCCESS-Turn {self.turns}-{player.name}-{player.points}--{player.fitness}-{decision["decision"]}-{dice_roll + modifiers}-{decision["card"]}-{self.landscape}-{decision["adventurers"]}-{player.hand}')
+                    logging.debug(f'SUCCESS|Turn {self.turns}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|{dice_roll + modifiers}|{decision["card"]}|{self.landscape}|{decision["adventurers"]}|{player.hand}')
                 decision_detail["outcome"] = "SUCCESS"
                 self.success(player, decision)
             else:
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-FAILURE')
-                    logging.debug(f'FAILURE-Turn {self.turns}-{player.name}-{player.points}-{player.fitness}-{decision["decision"]}-{dice_roll + modifiers}-{decision["card"]}-{self.landscape}-{decision["adventurers"]}-{player.hand}')
+                    logging.debug(f'FAILURE|Turn {self.turns}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|{dice_roll + modifiers}|{decision["card"]}|{self.landscape}|{decision["adventurers"]}|{player.hand}')
                 decision_detail["outcome"] = "FAILURE"
                 self.failure(player)
 
@@ -155,7 +154,7 @@ class Game():
 
     def get_number_of_games_enders(self) -> int:
 
-        # check if all the game ending cards have been captured and if so then break while loop
+        # check if all the game ending cards have been captured 
         remaining_DW_cards = itertools.chain(self.dragonwood_deck.cards, self.landscape)
         game_ending_cards = sum([x.game_ender for x in remaining_DW_cards if type(x) is Creature])
 
@@ -193,6 +192,7 @@ class Game():
 
                 if len(player.hand) > 9:
                     player.discard_card(self.adventurer_deck)
+                    
 
             self.turns += 1
 
@@ -271,9 +271,7 @@ class Game():
 
         if highest_score <= 0.33:
             selected_decision = {"decision": "reload"}
-            # if drawing a card would result in discarding a card reduce thier fitness score
-            if len(player.hand)==9:
-                player.fitness += -0.25
+
         else:
             selected_decision = {
             "decision": attack_options[index_of_highest_score][0],      # strike/stomp/scream

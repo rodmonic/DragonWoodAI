@@ -1,7 +1,6 @@
 import neat
 import os
-
-import pandas as pd
+from numpy import average
 
 from tqdm import tqdm
 
@@ -13,7 +12,7 @@ import Dragonwood.SharedRandom as sr
 
 sr.set_seed()
 
-generations = 1000
+generations = 50
 iterations = 100
 
 def evaluate_genome(genomes, config):
@@ -47,8 +46,8 @@ def evaluate_genome(genomes, config):
             player_details.extend(result["players_details"])
 
             # Determine the fitness score based on the outcome of the game
-            list_of_players_that_are_alice = [x for x in players if x.name == "Alice"]
-            fitness += list_of_players_that_are_alice[0].fitness
+            list_of_players_that_are_robots = [(x.points/x.adventure_cards_used)+x.fitness for x in players if x.is_robot]
+            fitness += average(list_of_players_that_are_robots)
 
         genome.fitness = fitness/iterations
     
@@ -61,8 +60,8 @@ def run_neat(config_file):
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
 
-    #p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-69')
+    p = neat.Population(config)
+    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-69')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)

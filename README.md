@@ -111,3 +111,9 @@ got to ~7 max fitness by 70 but then stryggled.
 
 ### Experiment 5
 added a negative 0.25 fitness penalty for drawing a card when it would result in losing a card.
+This seemed to confuse the AI and make it select invalid options more and also it didn't increase the score
+
+### Experiment 6
+Chnaged fitness function completely so it is
+
+score/number_of_adventure cards discarded + number of invlaid options chose *0.5

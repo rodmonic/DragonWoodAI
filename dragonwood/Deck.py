@@ -17,7 +17,7 @@ class Deck:
     def deal(self, n: int) -> List[Adventurer_Card | Dragonwood_Card]:
         cards_delt = []
         for _ in range(n):
-
+            
             if not self.cards and type(self) is Adventurer_Deck:
                 self.cards = self.discard
                 self.discard = []
