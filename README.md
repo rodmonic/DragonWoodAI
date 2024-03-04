@@ -116,10 +116,4 @@ This seemed to confuse the AI and make it select invalid options more and also i
 ### Experiment 6
 Chnaged fitness function completely so it is
 
-score/number_of_adventure cards discarded + number of invlaid options chose *0.5. 
-
-the AI did nothing after a few generations, the pushment was too severe and the revward to small.
-
-### Experiment 7
-
-Removed negative reward for invalid guesses and only provided valid options for selection.
+score/number_of_adventure cards discarded + number of invlaid options chose *0.5
