@@ -46,7 +46,7 @@ def evaluate_genome(genomes, config):
             player_details.extend(result["players_details"])
 
             # Determine the fitness score based on the outcome of the game
-            list_of_players_that_are_robots = [(x.points/x.adventure_cards_used)+x.fitness for x in players if x.is_robot]
+            list_of_players_that_are_robots = [x.fitness for x in players if x.is_robot]
             fitness += average(list_of_players_that_are_robots)
 
         genome.fitness = fitness/iterations

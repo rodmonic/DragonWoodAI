@@ -97,7 +97,6 @@ class Game():
         
         player.hand = [x for x in player.hand if x not in decision["adventurers"]]
         self.adventurer_deck.discard.extend(decision["adventurers"])
-        player.adventure_cards_used += len(decision["adventurers"])
 
     def failure(self, player):
         player.discard_card(self.adventurer_deck)
@@ -122,11 +121,6 @@ class Game():
             dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
             modifiers = getattr(player, decision["decision"] + "_modifier")
 
-            # check if it is a "bad decsision" (i.e. impossible for the AI to win that card) 
-            # and then punish them by reducing the fitness:
-            if (len(decision["adventurers"])*4 + modifiers) < (getattr(decision["card"], decision["decision"])):
-                player.fitness += -0.5
-
             decision_detail = {
                     "game_uuid": self.uuid,
                     "turn": self.turns,
@@ -136,7 +130,8 @@ class Game():
                     "dice_roll": dice_roll,
                     "player_points": player.points
                     }
-            #player.fitness += (dice_roll - getattr(decision["card"], decision["decision"]))
+
+
             if (dice_roll + modifiers) >= getattr(decision["card"], decision["decision"]):
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-SUCCESS')
@@ -262,6 +257,13 @@ class Game():
 
         for card in self.landscape:
             for index, attack_option in enumerate(attack_options):
+
+                modifiers = getattr(player, attack_option[0] + "_modifier")
+                # check if it is a "bad descision" (i.e. impossible for the AI to win that card) 
+                # and skip that card
+                if (len(attack_option[1])*4 + modifiers) < (getattr(card, attack_option[0])):
+                    continue
+
                 encoded_option = self.get_attack_option_game_state(attack_option[1], card, player.hand)
                 option_score = net.activate(encoded_option)[0]
                 if option_score > highest_score:
