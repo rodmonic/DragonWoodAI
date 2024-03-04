@@ -8,10 +8,10 @@ dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements
 adventurer_deck = Adventurer_Deck(5, 12)
 dice = Dice([1, 2, 2, 3, 3, 4])
 players = [
-            Player(0.5, -0.1, dice, "Alice"),
-            Player(0.5, -0.1, dice, "Bob"),
-            Player(0.5, -0.1, dice, "Charles"),
-            Player(0.5, -0.1, dice, "Dylan")
+            Player(0.5, -0.1, "Alice"),
+            Player(0.5, -0.1, "Bob"),
+            Player(0.5, -0.1, "Charles"),
+            Player(0.5, -0.1, "Dylan")
     ]
 
 creatures = [x for x in dragonwood_deck.cards if type(x) is Creature]
@@ -121,8 +121,8 @@ def test_game_state_creature_ecoding():
     game_state = game.get_attack_option_game_state(attack_option,dragonwood_deck.cards[1], [attack_option[1]])
 
     assert game_state[60+6] == 0.5
-    assert game_state[60+9] == 1.0
-    assert game_state[60+16] == 0.5
+    assert game_state[60+9] == 0.5
+    assert game_state[60+16] == 1.0
 
 
 # test failure
