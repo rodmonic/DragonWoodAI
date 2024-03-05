@@ -20,22 +20,24 @@ class Game():
         self.adventurer_deck = adventurer_deck
         self.dragonwood_deck = dragonwood_deck
         self.dice = dice
-        self.players = players
+        self.players = players if not shuffle_players else shared_random.sample(players, len(players))
         self.uuid = shortuuid.uuid()[:8]
         self.turns = 1
         self.landscape = []
+        self.winner = ''
+        self.initialise_game()
+
+    def __repr__(self) -> str:
+        return f'Game({len(self.players)} players)'
+
+    def initialise_game(self):
+        """Handles the initial setup for the game."""
         self.adventurer_deck.shuffle()
         self.dragonwood_deck.shuffle()
         self.initial_deal_adventurer()
         self.initial_deal_landscape()
         self.dragonwood_deck.initial_config(len(self.players))
-        self.winner = ''
-        self.shuffle_players = shuffle_players
 
-
-    def __repr__(self) -> str:
-
-        return f'Game({len(self.players)} players)'
 
     def get_players_details(self):
 
@@ -71,34 +73,29 @@ class Game():
         return sorted_players_with_max_points[0].uuid
 
     def initial_deal_adventurer(self):
-
         for player in self.players:
-            player.hand = []
-            player.hand.extend(self.adventurer_deck.deal(5))
+            player.hand = self.adventurer_deck.deal(5)
 
     def initial_deal_landscape(self):
+        self.landscape = self.dragonwood_deck.deal(5)
 
-        self.landscape.extend(self.dragonwood_deck.deal(5))
-
-    def success(self, player, decision):
+    def success(self, player: Player, decision: dict):
         dw_card = decision["card"]
         player.dragonwood_cards.append(dw_card)
+        player.points += getattr(dw_card, "points", 0)
 
-        if type(dw_card) is Creature:
-            player.points += decision["card"].points
-        elif type(dw_card) is Enhancement:
+        if isinstance(dw_card, Enhancement):
             for modification in dw_card.modifications:
-                current_value = getattr(player, modification)
-                setattr(player, modification, dw_card.modifier + current_value)
+                setattr(player, modification, getattr(player, modification) + dw_card.modifier)
 
 
         self.landscape.remove(decision["card"])
         self.landscape.extend(self.dragonwood_deck.deal(1))
         
-        player.hand = [x for x in player.hand if x not in decision["adventurers"]]
+        player.hand = [card for card in player.hand if card not in decision["adventurers"]]
         self.adventurer_deck.discard.extend(decision["adventurers"])
 
-    def failure(self, player):
+    def failure(self, player:Player):
         player.discard_card(self.adventurer_deck)
 
     def enact_decision(self, decision: dict, player: Player) -> None:
@@ -116,7 +113,7 @@ class Game():
             player.hand.extend(self.adventurer_deck.deal(1))
             if player.is_robot:
                 # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{player.hand}-{[str(x) for x in self.landscape]}-RELOAD')
-                logging.debug(f'RELOAD|Turn {self.turns}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|||{self.landscape}||{player.hand}')
+                logging.debug(f'RELOAD |Turn {self.turns:0>2d}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|||{self.landscape}||{player.hand}')
         else:
             dice_roll = self.dice.roll_n_dice(len(decision["adventurers"]))
             modifiers = getattr(player, decision["decision"] + "_modifier")
@@ -135,13 +132,13 @@ class Game():
             if (dice_roll + modifiers) >= getattr(decision["card"], decision["decision"]):
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-SUCCESS')
-                    logging.debug(f'SUCCESS|Turn {self.turns}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|{dice_roll + modifiers}|{decision["card"]}|{self.landscape}|{decision["adventurers"]}|{player.hand}')
+                    logging.debug(f'SUCCESS|Turn {self.turns:0>2d}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|{dice_roll + modifiers}|{decision["card"]}|{self.landscape}|{decision["adventurers"]}|{player.hand}')
                 decision_detail["outcome"] = "SUCCESS"
                 self.success(player, decision)
             else:
                 if player.is_robot:
                     # logging.debug(f'Turn {self.turns} {player.name} {decision["decision"]}-{dice_roll + modifiers}-{decision["adventurers"]}-{[str(x) for x in self.landscape]}-{decision["card"]}-FAILURE')
-                    logging.debug(f'FAILURE|Turn {self.turns}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|{dice_roll + modifiers}|{decision["card"]}|{self.landscape}|{decision["adventurers"]}|{player.hand}')
+                    logging.debug(f'FAILURE|Turn {self.turns:0>2d}|{player.name}|{player.points}|{player.fitness}|{decision["decision"]}|{dice_roll + modifiers}|{decision["card"]}|{self.landscape}|{decision["adventurers"]}|{player.hand}')
                 decision_detail["outcome"] = "FAILURE"
                 self.failure(player)
 
@@ -156,10 +153,6 @@ class Game():
         return game_ending_cards
 
     def play(self, net: FeedForwardNetwork=None, debug: bool = False):
-
-        # Shuffle players
-        if self.shuffle_players:
-            shared_random.shuffle(self.players)
 
         if not debug:
             logging.disable()
@@ -177,6 +170,8 @@ class Game():
                     attack_options = player.find_attack_options()
                     if player.is_robot:
                         decision = self.decide_by_nn(attack_options, net, player)
+                    elif player.is_random:
+                        decision = self.decide_by_random(attack_options)
                     else:
                         decision = player.decide_by_rules(self.landscape, self.dice.EV, attack_options)
 
@@ -195,6 +190,9 @@ class Game():
                 break
 
         self.winner = self.get_winner()
+
+        for player in self.players:
+            logging.debug(f"{player.name}|{player.points}|{player.fitness}")
 
         for robot_player in [x for x in self.players if x.is_robot]:
             if robot_player.uuid == self.winner:
@@ -281,5 +279,23 @@ class Game():
             "adventurers":  attack_options[index_of_highest_score][1],  # the adventurers used
         }
         
-
         return selected_decision
+    
+    def decide_by_random(self, attack_options: list[list[Adventurer_Card]]) -> dict:
+
+        attack_options.extend([])
+
+        selected_option = shared_random.choice(attack_options)
+        selected_card = shared_random.choice(self.landscape)
+
+        if selected_option:
+            selected_decision = {
+            "decision": selected_option[0],      # strike/stomp/scream
+            "card": selected_card,               # the card  within the landscape
+            "adventurers":  selected_option[1],  # the adventurers used
+        }
+        else:
+            selected_decision = {"decision": "reload"}
+        
+        return selected_decision
+

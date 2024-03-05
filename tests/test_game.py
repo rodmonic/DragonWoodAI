@@ -108,11 +108,7 @@ def test_game_state_adventurer_encoding():
 
 def test_game_state_creature_ecoding():
 
-    sr.set_seed(100)
-
     dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
-
-    dragonwood_deck.cards[0]
 
     game = Game(adventurer_deck, dragonwood_deck, players, dice)
 
