@@ -9,7 +9,7 @@ from Dragonwood.Deck import Adventurer_Deck
 
 class Player():
 
-    def __init__(self, risk_level: float, risk_adjustment: float, name: str, card_mask: list[str] = [], is_robot: bool = False, ):
+    def __init__(self, risk_level: float, risk_adjustment: float, name: str, card_mask: list[str] = [], is_robot: bool = False, is_random: bool = False):
         self.hand = []
         self.uuid = shortuuid.uuid()[:8]
         self.name = name
@@ -22,6 +22,7 @@ class Player():
         self.scream_modifier = 0
         self.card_mask = card_mask
         self.is_robot = is_robot
+        self.is_random = is_random
         self.fitness = 0
 
 
