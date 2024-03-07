@@ -170,6 +170,7 @@ class Game():
                     attack_options = player.find_attack_options()
                     if player.is_robot:
                         decision = self.decide_by_nn(attack_options, net, player)
+
                     elif player.is_random:
                         decision = self.decide_by_random(attack_options)
                     else:

@@ -26,7 +26,7 @@ def evaluate_genome(genomes, config):
             dice = Dice([1, 2, 2, 3, 3, 4])
             players = [
                 Player(0, 0, "Alice", [], True),
-                Player(0, 0, "Bob", []),
+                Player(0, 0, "Bob", [], False, True),
                 Player(0, 0, "Charles", []),
                 Player(0, 0, "Dylan", [])
             ]
@@ -46,7 +46,7 @@ def evaluate_genome(genomes, config):
             player_details.extend(result["players_details"])
 
             # Determine the fitness score based on the outcome of the game
-            list_of_players_that_are_robots = [x.fitness for x in players if x.is_robot]
+            list_of_players_that_are_robots = [x.points+x.fitness for x in players if x.is_robot]
             fitness += average(list_of_players_that_are_robots)
 
         genome.fitness = fitness/iterations
@@ -61,7 +61,7 @@ def run_neat(config_file):
                          config_file)
 
     p = neat.Population(config)
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-69')
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-64')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)

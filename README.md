@@ -161,7 +161,7 @@ changed the cut off for a reload decision to 0.33 as in the logs the AI seemed t
 - order of players scores were shuffled each time so was effectively adding confusion into the network.
 - also added in 10 more fitness points if they actaully win.
 
-got to ~7 max fitness by 70 but then stryggled.
+got to ~7 max fitness by 70 but then struggled.
 
 ### Experiment 5
 added a negative 0.25 fitness penalty for drawing a card when it would result in losing a card.
@@ -171,3 +171,10 @@ This seemed to confuse the AI and make it select invalid options more and also i
 Chnaged fitness function completely so it is
 
 score/number_of_adventure cards discarded + number of invlaid options chose *0.5
+
+This caused the AI to only reload
+
+### Experiments 7
+Change everything so only valid options are presented to the AI
+
+quicker to converge but still only managed 7-8
