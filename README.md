@@ -18,13 +18,13 @@ The game itself is quite simple and easy to learn but there are a number of deci
 
 The players play Adventurer cards to capture Dragonwood cards. The adventurer cards are numbered 1-12 and are of 5 diffrerent colours. A player can attack in 3 ways:
 
-- Strike - play cards that are in a row regardless of colour.
+- Strike - play cards that are in order regardless of colour.
 - Stomp - play cards that are all the same number.
 - Scream - play cards that are all the same colour.
 
 The player gets a dice per card and then uses them to defeat dragonwood cards to earn either that cards points value or enhancement.
 
-The deicision to use which cards in a players hand to try an defeat which dragonwood cards is the issue we're looking to solve. I'm hoping to be able to get an AI  to identify which cards to use to defeat the dragonwood cards and also which cards to target to give it the bet chance of winning.
+The decision to use which cards in a players hand to try an defeat which dragonwood cards is the issue we're looking to solve. I'm hoping to be able to get an AI  to identify which cards to use to defeat the dragonwood cards and also which cards to target to give it the bet chance of winning.
 
 One point to note is that the dice are 6 sided dice but with the values 1, 2, 2, 3, 3, 4. This gives the dice an [Expected Value](https://en.wikipedia.org/wiki/Expected_value) per roll of 2.5.
 
@@ -53,11 +53,11 @@ I did make a number of simplifying assumptions that shouldn't affect the overall
 
 * Certain enhancements I did not model and I just focussed on the cards that modify a users score. I also only dealt with permanent enhancements not ones that require the AI to decide whether to use them on each attack. This allows the AI to focus on the task of attacking and can be added in later once a sucessful algorithm and system have been developed.
 
-* As strategy will be slightly different dependant on the number of players, Initially I will play with 4 players; one controlled by AI and the other 3 by the determinsitic algorithm.
+* As strategy will be slightly different dependant on the number of players, Initially I will play with 4 players; one controlled by AI (I called her Alice) and the other 3 by the determinsitic algorithm (Bob, Charles and Dylan).
 
 ### Goal 2 - Determinsitic algorithm
 
-After the model was created I needed to develop a rule based approach to selecting an attack.
+After the model was created I needed to develop a rule based approach to selecting an attack. This is what I eventually judge any AI's success or failure against. After trail and error the following algorith was developed.
 
 1. Find all possible attacks and card combinations from a players current hand.
 1. For each card combo work out the expected value of the number of dice. This is the number of cards times by 2.5.
@@ -67,8 +67,43 @@ After the model was created I needed to develop a rule based approach to selecti
 
 ![DragonWoodAI Deterministic Algorithm](./docs/Dragonwood%20Determinsitic%20Algorithm.png "Example Deterministic Decision")
 
+#### Sensitivity Analysis
+As part of deiciding on the best algortihm i performed some analysis on what is the most successful formula for a rule based algorithm. To work out the the values of a and b that are most succusful in the below formula:
 
-## exploration
+$$min(c \times (Ev+a)+b)$$
+
+Where $c$ is the number of attaking cards and $Ev$ is expected value of the dice. 
+
+To find the best values for a and b I kept 3 players' $a$ and $b$ values constant at 0 and then searched through candidated values running a thousand games for each combination and seeing which  gave the best points per turn. After running 10000 games the results showed the optimum formula was:
+
+$$min(c \times (Ev+0.38)-0.13)$$
+
+![Sensitivity Analysis](./docs/sentivity%20analysis.png "Sensitivity Analysis")
+
+
+### Goal 3 - Dragonwood AI
+
+#### Intro
+
+#### Reinforcement Learning
+
+#### State and action space
+
+#### Deep Reinforcement Learning
+
+#### NEAT Intro
+
+#### Input Encoding
+
+#### Experiments
+
+#### Updated Encoding
+
+#### Success
+
+#### Results
+
+
 
 ## initial encoding:
 
@@ -178,3 +213,59 @@ This caused the AI to only reload
 Change everything so only valid options are presented to the AI
 
 quicker to converge but still only managed 7-8
+
+### Experiment 8
+
+Changed how the game state is encoded to:
+
+* length of attacking hand
+* score to beat
+* number of points
+* scream modifier
+* strike modifier
+* stomp modifier
+* player 1 score
+* player 2 score
+* player 3 score
+* player 4 score
+* number of game enders
+
+Population's average fitness: 8.94476 stdev: 5.79052
+Best fitness: 16.38450 - size: (8, 14) - species 44 - id 22335
+Average adjusted fitness: 0.449
+Mean genetic distance 3.107, standard deviation 0.750
+Population of 150 members in 8 species:
+   ID   age  size  fitness  adj fit  stag
+  ====  ===  ====  =======  =======  ====
+    44   24    27     10.4    0.636     3
+    45   20    21      6.9    0.421     6
+    47   17     5      1.8    0.113     2
+    48    8    32     13.4    0.817     0
+    49    5    19      7.9    0.480     1
+    50    4    19      7.6    0.461     1
+    51    4    18      7.6    0.463     2
+    52    1     9      3.3    0.201     0
+Total extinctions: 0
+Generation time: 362.522 sec (322.047 average)
+Saving checkpoint to neat-checkpoint-201
+
+Best genome:
+Key: 18633
+Fitness: 16.6885
+Nodes:
+        0 DefaultNodeGene(key=0, bias=-0.7395573638333613, response=1.0, activation=sigmoid, aggregation=sum)
+        3645 DefaultNodeGene(key=3645, bias=1.7304809219021717, response=1.0, activation=relu, aggregation=sum)
+        4321 DefaultNodeGene(key=4321, bias=1.9033812411004662, response=1.0, activation=relu, aggregation=sum)
+        5309 DefaultNodeGene(key=5309, bias=0.5905094695409188, response=1.0, activation=sigmoid, aggregation=sum)
+Connections:
+        DefaultConnectionGene(key=(-11, 3645), weight=-1.2387335143649874, enabled=False)
+        DefaultConnectionGene(key=(-10, 4321), weight=-0.6878208181792393, enabled=True)
+        DefaultConnectionGene(key=(-6, 3645), weight=0.7903554632648431, enabled=True)
+        DefaultConnectionGene(key=(-5, 3645), weight=-1.7362844731217704, enabled=True)
+        DefaultConnectionGene(key=(-5, 5309), weight=0.8831836465948204, enabled=True)
+        DefaultConnectionGene(key=(-3, 0), weight=3.060456333297272, enabled=True)
+        DefaultConnectionGene(key=(-3, 4321), weight=-0.7731497825441134, enabled=True)
+        DefaultConnectionGene(key=(-2, 0), weight=-9.989258211757239, enabled=True)
+        DefaultConnectionGene(key=(-1, 0), weight=9.387252634764408, enabled=True)
+        DefaultConnectionGene(key=(5309, 3645), weight=0.43687731206410607, enabled=True)
+PS C:\Users\DominicMcCaskill\repos\DragonWoodAI> 

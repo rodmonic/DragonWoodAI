@@ -1,10 +1,10 @@
 import neat
 import os
+from numpy import average
+
 import pickle
 
-import multiprocessing
-
-from numpy import average
+import pandas as pd
 
 from Dragonwood.Game import Game
 from Dragonwood.Deck import Adventurer_Deck, Dragonwood_Deck
@@ -14,13 +14,11 @@ import Dragonwood.SharedRandom as sr
 
 sr.set_seed()
 
-generations = 1
-iterations = 2000
+iterations = 10000
 
-def eval_genome(genome, config):
+def run_genome(net):
+    player_details = []
 
-    net = neat.nn.FeedForwardNetwork.create(genome, config)
-    fitness = 0
     for _ in range(iterations):
         dragonwood_deck = Dragonwood_Deck("./cards/creatures.csv", "./cards/enhancements.csv")
         adventurer_deck = Adventurer_Deck(5, 12)
@@ -39,43 +37,30 @@ def eval_genome(genome, config):
             dice=dice
         )  # Initialize your game with the starting state
         
-        game.play(
+        result = game.play(
             net=net,
-            debug=False
+            debug=True
         )
 
-        # Determine the fitness score based on the outcome of the game
-        fitness_of_players_that_are_robots = [x.points + x.fitness for x in players if x.is_robot]
-        fitness += average(fitness_of_players_that_are_robots)
+        player_details.extend(result["players_details"])
 
-    return fitness/iterations
     
+    df = pd.DataFrame.from_dict(player_details)
+    df.to_csv(f'./data/NEAT/player_details.csv')
 
 
-
-def run_neat(config_file):
+def run_neat(config_file, winner_pickle):
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
+    file = open(winner_pickle,'rb')
+    winner = pickle.load(file)
+    winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
+    run_genome(winner_net)
 
-    # p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-279')
-    p.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReporter()
-    p.add_reporter(stats)
-    checkpointer = neat.Checkpointer(1)
-    p.add_reporter(checkpointer)
-
-    pe = neat.ParallelEvaluator(multiprocessing.cpu_count(), eval_genome)
-    winner = p.run(pe.evaluate, generations)
-    print('\nBest genome:\n{!s}'.format(winner))
-
-    # Save the winner.
-    with open('winner-feedforward', 'wb') as f:
-        pickle.dump(winner, f)
-
-
+    
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, "./NEAT/config-feedforward.txt")
-    run_neat(config_path)
+    winner_pickle = os.path.join(local_dir, "winner-feedforward")
+    run_neat(config_path, winner_pickle)

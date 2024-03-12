@@ -26,7 +26,7 @@ def evaluate_genome(genomes, config):
             dice = Dice([1, 2, 2, 3, 3, 4])
             players = [
                 Player(0, 0, "Alice", [], True),
-                Player(0, 0, "Bob", [], False, True),
+                Player(0, 0, "Bob", []),
                 Player(0, 0, "Charles", []),
                 Player(0, 0, "Dylan", [])
             ]
@@ -60,8 +60,8 @@ def run_neat(config_file):
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
 
-    p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-64')
+    # p = neat.Population(config)
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-235')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)

@@ -170,7 +170,6 @@ class Game():
                     attack_options = player.find_attack_options()
                     if player.is_robot:
                         decision = self.decide_by_nn(attack_options, net, player)
-
                     elif player.is_random:
                         decision = self.decide_by_random(attack_options)
                     else:
@@ -193,11 +192,11 @@ class Game():
         self.winner = self.get_winner()
 
         for player in self.players:
-            logging.debug(f"{player.name}|{player.points}|{player.fitness}")
+            if player.uuid == self.winner:
+                player.fitness += 10.0
 
-        for robot_player in [x for x in self.players if x.is_robot]:
-            if robot_player.uuid == self.winner:
-                robot_player.fitness += 10.0
+        for player in self.players:
+            logging.debug(f"{player.name}|{player.points}|{player.fitness}")
 
         return {
             "game_uuid": self.uuid,
@@ -207,46 +206,60 @@ class Game():
             "players_details": self.get_players_details()
         }
 
-    def get_attack_option_game_state(self, attack_option: list[Adventurer_Card], dragonwood_card: Dragonwood_Card, hand: list[Adventurer_Card]) -> list[float]:
+    def get_attack_option_game_state(self, attack_option: list, dragonwood_card: Dragonwood_Card) -> list[float]:
 
-        encoded_attack_option= self.get_encoded_attack_option(attack_option, hand)
-        encoded_landscape = self.get_encoded_landscape(dragonwood_card)
-        player_points = [x.points/50 for x in sorted(self.players, key=lambda obj: obj.name)]
-        number_of_game_enders = [self.get_number_of_games_enders()/2]
+        encoded_attack_option= [self.get_encoded_attack_option(attack_option[1])]
+        encoded_card = self.get_encoded_card(dragonwood_card, attack_option[0])
+        encoded_player_points = [x.points/50 for x in sorted(self.players, key=lambda obj: obj.name)]
+        encoded_game_enders = [self.get_number_of_games_enders()/2]
 
         state = list(
             itertools.chain(
                 encoded_attack_option,
-                encoded_landscape,
-                player_points,
-                number_of_game_enders
+                encoded_card,
+                encoded_player_points,
+                encoded_game_enders
             )
             )
 
         return state
 
-    def get_encoded_attack_option(self, attack_option: list[Adventurer_Card], hand: list[Adventurer_Card]) -> list[int]:
+    def get_encoded_attack_option(self, attack_option: list[Adventurer_Card]) -> float:
 
-        suits = self.adventurer_deck.suits
-        values = self.adventurer_deck.values
-        attack_option_encoded = [0.0] * (suits * values)
+        return len(attack_option)/6.0
 
-        cards = list(itertools.chain(attack_option, hand))
+
+    def get_encoded_card(self, card: Dragonwood_Card, attribute: str ) -> list[float]:
         
-        for card in cards:
-            attack_option_encoded[values*card.suit + card.value] += 0.5
+        if isinstance(card, Creature):
+            points = [
+                getattr(card, attribute)/15.0,
+                card.points/7, 
+                0.0, 
+                0.0, 
+                0.0
+                ]
+        else:
+            strike_modifier = 0
+            scream_modifier = 0
+            stomp_modifier = 0
 
-        return attack_option_encoded
+            if "strike_modifier" in card.modifications:
+                strike_modifier = card.modifier/2
+            elif "stomp_modifier" in card.modifications:
+                stomp_modifier = card.modifier/2
+            elif "scream_modifier" in card.modifications:
+                scream_modifier = card.modifier/2
 
-    def get_encoded_landscape(self, dragonwood_card: Dragonwood_Card ) -> list[int]:
-        landscape_encoded = [0.0] * len(self.dragonwood_deck.lookup)
+            points = [
+                getattr(card, attribute)/15.0,
+                0.0, 
+                strike_modifier,
+                stomp_modifier,
+                scream_modifier
+            ]
 
-        for card in set(self.landscape):
-            landscape_encoded[self.dragonwood_deck.lookup[card.name]] = 0.5
-
-        landscape_encoded[self.dragonwood_deck.lookup[dragonwood_card.name]] = 1.0
-
-        return landscape_encoded
+        return points
 
     def decide_by_nn(self, attack_options: list[list[Adventurer_Card]], net: FeedForwardNetwork, player: Player) -> dict:
         
@@ -263,7 +276,7 @@ class Game():
                 if (len(attack_option[1])*4 + modifiers) < (getattr(card, attack_option[0])):
                     continue
 
-                encoded_option = self.get_attack_option_game_state(attack_option[1], card, player.hand)
+                encoded_option = self.get_attack_option_game_state(attack_option, card)
                 option_score = net.activate(encoded_option)[0]
                 if option_score > highest_score:
                     highest_score = option_score
