@@ -14,80 +14,136 @@ Dragonwood is a fantasy-themed card and dice game designed by Darren Kisgen. Set
 
 The game itself is quite simple and easy to learn but there are a number of decisions the players need to make and lots of scope for elementary strategy even though there is a large probabilistic element to the game. The game is summarised in the rules as:
 
->*Play cards to earn dice, which you will roll to defeat a ferce array of creatures, or capture magical items that may help you along the way. Whoever earns the most victory points wins.*
+>*Play cards to earn dice, which you will roll to defeat a fierce array of creatures, or capture magical items that may help you along the way. Whoever earns the most victory points wins.*
 
-The players play Adventurer cards to capture Dragonwood cards. The adventurer cards are numbered 1-12 and are of 5 diffrerent colours. A player can attack in 3 ways:
+The players play Adventurer cards to capture Dragonwood cards. The adventurer cards are numbered 1-12 and are of 5 different colours. A player can attack in 3 ways:
 
 - Strike - play cards that are in order regardless of colour.
 - Stomp - play cards that are all the same number.
 - Scream - play cards that are all the same colour.
 
-The player gets a dice per card and then uses them to defeat dragonwood cards to earn either that cards points value or enhancement.
+The player gets a dice per card and then uses them to defeat Dragonwood cards to earn either that cards points value or enhancement.
 
-The decision to use which cards in a players hand to try an defeat which dragonwood cards is the issue we're looking to solve. I'm hoping to be able to get an AI  to identify which cards to use to defeat the dragonwood cards and also which cards to target to give it the bet chance of winning.
+The decision to use which cards in a players hand to try an defeat which Dragonwood cards is the issue we're looking to solve. I'm hoping to be able to get an AI  to identify which cards to use to defeat the Dragonwood cards and also which cards to target to give it the bet chance of winning.
 
 One point to note is that the dice are 6 sided dice but with the values 1, 2, 2, 3, 3, 4. This gives the dice an [Expected Value](https://en.wikipedia.org/wiki/Expected_value) per roll of 2.5.
 
 An example attack is included below to illustrate the decision making process.
-![Dragonwood Example Decision](./docs/Dragonwood%20Example%20Decision.png "An Example Attack")
+
+![Dragonwood Example Decision](./docs/Dragonwood%20Example%20Decision.png "An Example Attack") |
+:--: |
+Example attack |
 
 ## Goals
 
 Given the scope of the problem and the initial wide variety of possibilities, I set out some initial goals to allow me to focus my efforts. As this was an exercise to explore what's possible these are very flexible and will be amended based on the progress I make and research I undertake.
 
-1. Create a model to allow me to play dragonwood programatically in Python
-1. Develop an rule based algortihm to play dragonwood deterministically and model how a player selects which cards to attack and when.
-1. Develop an AI that can play dragonwood as good, or better than the rule based algorithm.
+1. Create a model to allow me to play Dragonwood programmatically in Python
+1. Develop an rule based algorithm to play Dragonwood deterministically and model how a player selects which cards to attack and when.
+1. Develop an AI that can play Dragonwood as good, or better than the rule based algorithm.
+1. Learn some strategies from the AI to improve my chances against my kids.
 
-As a stretch goal for this activity I want to leave as much of the game logic to be determined by the AI. So the AI should be given as little of the games' rules and should learn through its interation with the game instead of explicit sturctural learning.
+As a stretch goal for this activity I want to leave as much of the game logic to be determined by the AI. So the AI should be given as little of the games' rules and should learn through its interaction with the game instead of explicit structural learning.
 
 ### Goal 1 - Python Model
 
-The first step of the process is to create a model within python to allow me to play dragonwood, based on the [ruleset](https://aadl.org/files/catalog_guides/Dragonwood%20-%20rules.pdf) published online. To do this I created a custom class within python that contained all the objects and methods to complete a game. A simplified version of this model is included below. I have left off the attributes and methods for simpicity
+The first step of the process is to create a model within python to allow me to play dragonwood, based on the [ruleset](https://aadl.org/files/catalog_guides/Dragonwood%20-%20rules.pdf) published online. To do this I created a custom class within python that contained all the objects and methods to complete a game. A simplified version of this model is included below. I have left off the attributes and methods for simplicity
 
-![DragonWoodAI Object Model](./docs/Dragonwood%20Object%20Model.png "Object Model")
+![DragonWoodAI Object Model](./docs/Dragonwood%20Object%20Model.png "Object Model") |
+:--: |
+Dragonwood model diagram |
 
-I did make a number of simplifying assumptions that shouldn't affect the overall gameplay but will make the model more streamlined. 
+I did make a number of simplifying assumptions that shouldn't affect the overall gameplay but will make the model more streamlined.
 
-* I removed certain cards that are only chance based and effect all players with the same probability. These shouldn't affect how the AI plays over a large number of iterations.
+- I removed certain cards that are only chance based and effect all players with the same probability. These shouldn't affect how the AI plays over a large number of iterations.
 
-* Certain enhancements I did not model and I just focussed on the cards that modify a users score. I also only dealt with permanent enhancements not ones that require the AI to decide whether to use them on each attack. This allows the AI to focus on the task of attacking and can be added in later once a sucessful algorithm and system have been developed.
+- Certain enhancements I did not model and I just focussed on the cards that modify a users score. I also only dealt with permanent enhancements not ones that require the AI to decide whether to use them on each attack. This allows the AI to focus on the task of attacking and can be added in later once a successful algorithm and system have been developed.
 
-* As strategy will be slightly different dependant on the number of players, Initially I will play with 4 players; one controlled by AI (I called her Alice) and the other 3 by the determinsitic algorithm (Bob, Charles and Dylan).
+- As strategy will be slightly different dependant on the number of players, Initially I will play with 4 players; one controlled by AI (I called her Alice) and the other 3 by the deterministic algorithm (Bob, Charles and Dylan).
 
-### Goal 2 - Determinsitic algorithm
+### Goal 2 - Deterministic algorithm
 
-After the model was created I needed to develop a rule based approach to selecting an attack. This is what I eventually judge any AI's success or failure against. After trail and error the following algorith was developed.
+After the model was created I needed to develop a rule based approach to selecting an attack. This is what I will eventually judge any AI's success or failure against. After trail and error the following algorithm was developed.
 
 1. Find all possible attacks and card combinations from a players current hand.
-1. For each card combo work out the expected value of the number of dice. This is the number of cards times by 2.5.
+1. For each card combo work out the expected value of the number of dice. This is the number of cards times by the Expected Value of the dice - 2.5.
 1. Add any modifiers from enhancements
 1. Take away the score on the card that is trying to be captured.
-1. Select the optons with the lowest positive score.
+1. Select the options with the lowest positive score.
 
-![DragonWoodAI Deterministic Algorithm](./docs/Dragonwood%20Determinsitic%20Algorithm.png "Example Deterministic Decision")
+![DragonWoodAI Deterministic Algorithm](./docs/Dragonwood%20Determinsitic%20Algorithm.png "Example Deterministic Decision") |
+:--: |
+example rule based decision |
 
 #### Sensitivity Analysis
-As part of deiciding on the best algortihm i performed some analysis on what is the most successful formula for a rule based algorithm. To work out the the values of a and b that are most succusful in the below formula:
 
-$$min(c \times (Ev+a)+b)$$
+As part of deciding on the best algorithm i performed some analysis on what is the most successful formula for a rule based algorithm. To work out the the values of a and b that are most successful in the below formula:
 
-Where $c$ is the number of attaking cards and $Ev$ is expected value of the dice. 
+$$(c \times (Ev_{dice}+a)+b)- score$$
 
-To find the best values for a and b I kept 3 players' $a$ and $b$ values constant at 0 and then searched through candidated values running a thousand games for each combination and seeing which  gave the best points per turn. After running 10000 games the results showed the optimum formula was:
+Where:
 
-$$min(c \times (Ev+0.38)-0.13)$$
+- $c$ is the number of attacking cards
+- $Ev_{dice}$ is expected value of the dice.
+- $ score $ is the Dragonwood card's score to beat
 
-![Sensitivity Analysis](./docs/sentivity%20analysis.png "Sensitivity Analysis")
+To find the best values for a and b I kept 3 players' $a$ and $b$ values constant at 0 and then searched through candidate values running a thousand games for each combination and seeing which  gave the best points per turn. After running 10000 games the results showed the optimum formula was:
 
+$$(c \times (2.50+0.38)-0.13) - score$$
+
+![Sensitivity Analysis](./docs/sentivity%20analysis.png "Sensitivity Analysis") |
+:--: |
+Search matrix for values of $a$ and $b$ |
 
 ### Goal 3 - Dragonwood AI
 
 #### Intro
 
-#### Reinforcement Learning
+Once I had generated a system to programmatically play Dragonwood I then needed to understand what approach I would take to teach an AI to play the game. The game itself is quite simple and has a clear way of measuring success of a player, i.e. their score or the fact that they have won. After some initial research i identified 2 techniques:
+
+- [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A reinforcement learning technique where multiple runs of the game would produce a table with the best action for every possible move a player can make.
+
+- [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture.
+
+#### Terminology
+
+There are a few core concepts within our problem:
+
+- **Environment.** The environment is the entity we are a looking to learn from. In our case this is the Dragonwood game and more specifically the Dragonwood model created in Python.
+
+- **State.** The state of the environment is a set of variables that describe the current game. This is something we have to devise and make sure it includes enough information for the AI to learn from. It could be the cards in the players hands, the players score, which cards have been captured. How this information is encoded is also very important.
+
+- **Action.** The action or decision that the AI has performed. In our case this will be one or more adventurer cards to attack one Dragonwood card.
+
+- **Reward.** This is a function rewards the AI's action within the environment for the given state. This is for us to decide and should reward the AI to prioritise beneficial behaviour. In our case we want to prioritise not only getting points but also winning the game.
+
+- **Agent.** An AI controlled user that can perform actions on the environment given a game state and receives rewards. In our case there will be a single AI agent and a number of rule based users that will perform actions but which we wont refer to as Agents for clarity. We will refer to our AI controlled agent as Alice throughout.
+
+![Learning Diagram](./docs/Learning%20diagram.png "Learning Diagram") |
+:--: |
+Learning diagram |
+
+These concepts are used within both of our techniques with the difference being in how the Agent makes a decision to perform an action.
+
+#### Q-Learning
+
+Q-learning is a branch of Reinforcement learning where an agent, learns by iterating over the possible actions multiple times to which actions lead to the best outcomes. It does this through the generation and iterative update of what's known as a Q-Learning Table.
+
+The Q-Learning Table is a $N \times M$ matrix Q with:
+
+- $N$ being the number of possible states
+- $M$ being the number of possible actions
+- $Q_{nm}$ being the Q-value of action $n$ under state $m$
+
+The Q-value is calculated iteratively and updated as the agent takes actions and receives rewards. In simple terms the higher the Q-Value the better the action $m$ under state $n$. As the Q-table is updated the agent will take the action with the highest Q-value for the current state.
+
+The Q-value is updated according to a complex formula that includes a learning rate to allow for exploration of new possibilities as well as learning as from previous experience.
 
 #### State and action space
+
+The first step to implement Q-Learning would be for us to define the action space and state space to allow me to define the Q-table. As stated in the stretch goal for this task I wanted to try and not abstract away the game rules where possible. This means I want to just and provide the AI Agent with the game and action state and to allow it to learn it's behaviour based on the reward function.
+
+To provide the Agent with the most amount of information to 
 
 #### Deep Reinforcement Learning
 
@@ -103,14 +159,12 @@ $$min(c \times (Ev+0.38)-0.13)$$
 
 #### Results
 
-
-
-## initial encoding:
+## initial encoding
 
 62 neurons to model the current hand, 1 if the player has that card and 2 if it's part of the attack option
 34 neurons to model the current landscape 1 if the player has that card and 2 if it's part of the attack option
 4 neurons for the points for each player
-1 neuron for the number of game ender cards still out there 
+1 neuron for the number of game ender cards still out there
 
 ### series 1
 
@@ -118,7 +172,6 @@ $$min(c \times (Ev+0.38)-0.13)$$
 - iterations per run 100
 - activation function tanh
 - score as fitness
-
 
 Population's average fitness: 2.50200 stdev: 0.78152
 Best fitness: 3.97000 - size: (1, 81) - species 1 - id 197
@@ -148,15 +201,15 @@ Population of 20 members in 1 species:
      1   12    20      3.1    0.492     1
 Total extinctions: 0
 Generation time: 431.918 sec (425.567 average)
- 
+
 ## next encoding
 
 62 neurons to model the current hand, 1 if the player has that card and 2 if it's part of the attack option
 34 neurons to model the current landscape 1 if the player has that card and 2 if it's part of the attack option
 4 neurons for the points for each player
-1 neuron for the number of game ender cards still out there 
+1 neuron for the number of game ender cards still out there
 
-but all normalised to [0,1]
+but all normalised to \[0,1\]
 
 Managed to get around 7 fitness after 60 generations
 
