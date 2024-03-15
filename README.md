@@ -141,15 +141,73 @@ The Q-value is updated according to a complex formula that includes a learning r
 
 #### State and action space
 
-The first step to implement Q-Learning would be for us to define the action space and state space to allow me to define the Q-table. As stated in the stretch goal for this task I wanted to try and not abstract away the game rules where possible. This means I want to just and provide the AI Agent with the game and action state and to allow it to learn it's behaviour based on the reward function.
+The first step to implement Q-Learning would be to define the action space and state space to allow me to define the Q-table. As stated in the stretch goal for this task I wanted to try and not abstract away the game rules where possible. This means I want to just and provide the AI Agent with the game and action state and to allow it to learn it's behaviour based on the reward function.
 
-To provide the Agent with the most amount of information to 
+To provide the Agent with the most amount of information to make its decision and without limiting its choices programmatically the state would need to represent:
 
-#### Deep Reinforcement Learning
+- Which adventurer cards are in the player's hand out of the possible 62.
+
+- Which Dragonwood cards are in the landscape out of a possible 34.
+
+Given this state the actions would then be:
+
+- Which adventurer cards has the agent selected to attack with.
+
+- Which Dragonwood card has the agent selected to attack.
+
+Given this definition the action-state space does become quite large.
+
+- For a player's hand it could be up to 9 cards chosen without replacement from the deck of 62 which gives us 24,228,029,107 hands.
+
+- For the landscape it could be any combination of 5 cards from the 34 cards available which gives up 331,212.
+
+A very large action-state space means that the model will need to be run longer to make sure all possible combinations are investigated. One way to reduce the action-state space would be to simplify how the state is represented or to use Deep Q-Learning which uses a neural network to represent the Q-table. However, I felt that there might be other algorithms and techniques out there that would allow me to train the AI without simplification.
 
 #### NEAT Intro
 
+NeuroEvolution of Augmenting Topologies (NEAT) is an algorithm developed in 2002 to generate and vary neural networks in a way based on genetic principals. The algorithm varies both the weights, biases and structure of the neural network by mutating and reproducing neural networks to find the best structure to maximise the reward function.
+
+One of the advantages of NEAT is it can handle continuous or multi-dimensional state spaces. This fits our problem quite well from my research into Q-Learning.
+
+I heard about NEAT and it's applicability to my problem through a youtube video that taught an AI to play Monopoly. It's a very interesting watch and is very useful as it shares a lot of the challenges I faced in my problem. Namely, how do I factor in probability in teaching an AI and how do I encode a large and complex state space. It's an interesting watch and includes a link to a github page which was invaluable when I was working through this problem.
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/dkvFcYBznPI/0.jpg)](https://www.youtube.com/watch?v=dkvFcYBznPI)
+
+#### NEAT Process
+
+Now we have a technique selected and before we go into the important step of input encoding I thought it would be good to cover at a high level how the environment, agent and reward function are going to be used with this technique. All of the below is implemented using the [Neat-Python](https://neat-python.readthedocs.io/en/latest/index.html) packaage.
+
+1. A network is provided by the NEAT algorithm.
+1. This network is then provided to the Dragonwood game and assigned to the Alice player.
+1. A game is then played between Alice and the 3 other players.
+1. Each time Alice attacks, the environment provides a list of all possible combinations of attacking cards and dragonwood cards to attack. 
+1. Each attack combination is then encoded and inputted into the network.
+1. The attack combination with the highest score from the network is then enacted.
+1. This is repeated until the game ends.
+1. The reward is calculated for that network and game.
+1. To make sure the networks are given a chance to understand the implications of their weightings and architecture 2000 games are run and the average passed to the NEAT algorithm. 
+1. The NEAT algorithm then varies the networks based on the reward gained from the game. 
+
+This process is iterated until a certain number of iterations is passed or the fitness function exceeds a user specified limit.
+
+#### Reward Function
+
+The reward function should be derived to make sure that the correct behaviour is being encouraged through the learning process. The reward function outputs a float number with higher being better. Initially, given our stretch goal of trying to make the AI learn rules instead of imposing rules on it, the AI was provided with a full list of possible attack options including ones that were statistically not possible to attain. I.e. the score of the card was higher than the highest possible dice roll for that option. 
+
+The first iteration of our Reward function was simple:
+
+> The reward would be the amount of points obtained by the network in a game.
+
+Over the process of this I had to change the reward function many times to try and correct the AI's behaviour and improve it's chance of winning.
+
+
 #### Input Encoding
+
+Now I have a reward function, a learning algorithm and a high level process the final piece of the puzzle is how do I encode the game state to input into the neural network. This step was actually what took the longest time and included much searching of stack overflow and bothering ChatGPT. For the encoding to be successful it must:
+
+- Include all relevant information that the netowrk needs to make a decision.
+- Be a 1 dimensional array of floats within the range [0,1]
+
 
 #### Experiments
 
