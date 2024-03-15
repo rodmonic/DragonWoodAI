@@ -101,13 +101,7 @@ Search matrix for values of $a$ and $b$ |
 
 Reinforcement Learning is a paradigm within machine learning where an AI controlled agent learns optimal behaviour within an environment by exploring actions and seeing their impact on a reward function. The main advantage of reinforcement learning is that we do not need a labelled data set on which to train our model, it also works well within games as we have an easily identifiable agent in the form of players.
 
-- [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A reinforcement learning technique where multiple runs of the game would produce a table with the best action for every possible move a player can make.
-
-- [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture.
-
-#### Reinforcement Learning.
-
-There are a few core concepts within reinforcement learning, the:
+Reinforcement learning involves the interatiom of the following elements:
 
 - **Environment.** The environment is the entity we are a looking to learn from. In our case this is the Dragonwood game and more specifically the Dragonwood model created in Python.
 
@@ -122,6 +116,16 @@ There are a few core concepts within reinforcement learning, the:
 ![Learning Diagram](./docs/Learning%20diagram.png "Learning Diagram") |
 :--: |
 Learning diagram |
+
+There are mutliple different techniques within reinforcement learning for this specific problem I investigated the below two:
+
+- [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A reinforcement learning technique where multiple runs of the game would produce a table with the best action for every possible move a player can make.
+
+- [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture.
+
+#### Reinforcement Learning.
+
+There are a few core concepts within reinforcement learning, the:
 
 These concepts are used within both of our techniques with the difference being in how the Agent makes a decision to perform an action.
 
