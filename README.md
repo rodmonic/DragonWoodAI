@@ -117,17 +117,13 @@ Reinforcement learning involves the interatiom of the following elements:
 :--: |
 Learning diagram |
 
-There are mutliple different techniques within reinforcement learning for this specific problem I investigated the below two:
+There are mutliple different techniques within reinforcement learning, for this specific problem I investigated the below two:
 
 - [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A reinforcement learning technique where multiple runs of the game would produce a table with the best action for every possible move a player can make.
 
 - [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture.
 
-#### Reinforcement Learning.
-
-There are a few core concepts within reinforcement learning, the:
-
-These concepts are used within both of our techniques with the difference being in how the Agent makes a decision to perform an action.
+#### 
 
 #### Q-Learning
 
