@@ -40,7 +40,7 @@ Given the scope of the problem and the initial wide variety of possibilities, I 
 
 1. Create a model to allow me to play Dragonwood programmatically in Python
 1. Develop an rule based algorithm to play Dragonwood deterministically and model how a player selects which cards to attack and when.
-1. Develop an AI that can play Dragonwood as good, or better than the rule based algorithm.
+1. Develop an AI that can play Dragonwood using reinforcement learning as good, or better than the rule based algorithm.
 1. Learn some strategies from the AI to improve my chances against my kids.
 
 As a stretch goal for this activity I want to leave as much of the game logic to be determined by the AI. So the AI should be given as little of the games' rules and should learn through its interaction with the game instead of explicit structural learning.
@@ -97,17 +97,17 @@ Search matrix for values of $a$ and $b$ |
 
 ### Goal 3 - Dragonwood AI
 
-#### Intro
+#### Intro to reinforcement learning
 
-Once I had generated a system to programmatically play Dragonwood I then needed to understand what approach I would take to teach an AI to play the game. The game itself is quite simple and has a clear way of measuring success of a player, i.e. their score or the fact that they have won. After some initial research i identified 2 techniques:
+Reinforcement Learning is a paradigm within machine learning where an AI controlled agent learns optimal behaviour within an environment by exploring actions and seeing their impact on a reward function. The main advantage of reinforcement learning is that we do not need a labelled data set on which to train our model, it also works well within games as we have an easily identifiable agent in the form of players.
 
 - [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A reinforcement learning technique where multiple runs of the game would produce a table with the best action for every possible move a player can make.
 
 - [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture.
 
-#### Terminology
+#### Reinforcement Learning.
 
-There are a few core concepts within our problem:
+There are a few core concepts within reinforcement learning, the:
 
 - **Environment.** The environment is the entity we are a looking to learn from. In our case this is the Dragonwood game and more specifically the Dragonwood model created in Python.
 
