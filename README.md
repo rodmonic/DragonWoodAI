@@ -30,8 +30,6 @@ An example attack is included below to illustrate the decision making process.
 :--: |
 Example attack |
 
-Once the game is over whoever has the most victory points wins.
-
 The decision to use which cards in a players hand to try an defeat which Dragonwood cards is the decision we are trying to get an AI to make. I'm hoping to be able to get an AI to identify which cards to use to defeat the Dragonwood cards and also which cards to target to give it the best chance of winning.
 
 ## Goals
@@ -40,7 +38,7 @@ Given the scope of the problem and the initial wide variety of possibilities, I 
 
 1. Create a model to allow me to play Dragonwood programmatically in Python
 1. Develop an rule based algorithm to play Dragonwood deterministically and model how a player selects which cards to attack and when.
-1. Develop an AI that can play Dragonwood using reinforcement learning as good, or better than the rule based algorithm.
+1. Develop an AI that can play Dragonwood using reinforcement learning that is as good, or better than the rule based algorithm.
 1. Learn some strategies from the AI to improve my chances against my kids.
 
 As a stretch goal for this activity I want to leave as much of the game logic to be determined by the AI. So the AI should be given as little of the games' rules and should learn through its interaction with the game instead of explicit structural learning.
