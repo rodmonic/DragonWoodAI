@@ -181,7 +181,7 @@ Now we have a technique selected and before we go into the important step of inp
 1. The attack combination with the highest score from the network is then enacted.
 1. This is repeated until the game ends.
 1. The reward is calculated for that network and game.
-1. To make sure the networks are given a chance to understand the implications of their weightings and architecture 2000 games are run and the average passed to the NEAT algorithm. 
+1. To make sure the networks are given a chance to understand the implications of their weightings and architecture 2000 games are run and Aliec's average score passed to the NEAT algorithm. 
 1. The NEAT algorithm then varies the networks based on the reward gained from the game. 
 
 This process is iterated until a certain number of iterations is passed or the fitness function exceeds a user specified limit.
