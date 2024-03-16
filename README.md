@@ -165,9 +165,9 @@ NeuroEvolution of Augmenting Topologies (NEAT) is an algorithm developed in 2002
 
 One of the advantages of NEAT is it can handle continuous or multi-dimensional state spaces. This fits our problem quite well.
 
-I heard about NEAT and it's applicability to my problem through a youtube video that taught an AI to play Monopoly. It's a very interesting watch and is very useful as it shares a lot of the challenges I faced in my problem. Namely, how do I factor in probability in teaching an AI and how do I encode a large and complex state space. It's an interesting watch and includes a link to a github page which was invaluable when I was working through this problem.
+I heard about NEAT through a youtube video that taught an AI to play Monopoly. It's a very interesting watch and is very useful as it shares a lot of the challenges I faced in my problem. Namely, how do I factor in probability in teaching an AI and how do I encode a large and complex state space. It's an interesting watch and includes a link to a github page which was invaluable when I was working through this problem.
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/dkvFcYBznPI/0.jpg)](https://www.youtube.com/watch?v=dkvFcYBznPI)
+[![](https://img.youtube.com/vi/dkvFcYBznPI/0.jpg)](https://www.youtube.com/watch?v=dkvFcYBznPI)
 
 #### NEAT Process
 
@@ -196,13 +196,22 @@ The first iteration of our Reward function was simple:
 
 Over the process of this I had to change the reward function many times to try and correct the AI's behaviour and improve it's chance of winning.
 
-
 #### Input Encoding
 
 Now I have a reward function, a learning algorithm and a high level process the final piece of the puzzle is how do I encode the game state to input into the neural network. This step was actually what took the longest time and included much searching of stack overflow and bothering ChatGPT. For the encoding to be successful it must:
 
 - Include all relevant information that the netowrk needs to make a decision.
 - Be a 1 dimensional array of floats within the range [0,1]
+- Be as simple as possible to allow the Neural Network to recognise the relationships with the state, actions and rewards.
+
+For each attack option the following information would be encoded:
+
+Current cards in players hand
+Current card in attack option
+Current dragonwood cards available to attack
+Selected dragonwood card to attack.
+All players current points
+context 
 
 
 #### Experiments
