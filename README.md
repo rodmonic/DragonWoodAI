@@ -6,25 +6,21 @@ I, like most parents, enjoy playing board games with my kids and one they partic
 
 My approach to understanding this problem is to create a way of playing thousands of games of Dragonwood which should enable me to test out strategies and see which are most successful. Once a suitable system has been developed a stretch goal would be to train an AI to play against a deterministic opponent and see if an AI can find a better approach than I can.
 
-### The Game
-
-Dragonwood is a fantasy-themed card and dice game designed by Darren Kisgen. Set in the mystical realm of Dragonwood, players embark on an adventurous quest to capture magical creatures and collect valuable items. The game revolves around the strategic use of cards representing adventurers, creatures, and enhancements, as well as dice for resolving conflicts. Players face the dual challenge of building a powerful deck and employing effective dice rolls to defeat various creatures in the dangerous forest. The game combines luck and strategy, offering a dynamic and engaging experience as players strive to accumulate the most victory points by the end of the game. Dragonwood's accessible mechanics make it suitable for players of various ages, providing an enjoyable and immersive gaming experience in a whimsical fantasy setting.
-
-### Rules
+## The Game
 
 The game itself is quite simple and easy to learn but there are a number of decisions the players need to make and lots of scope for elementary strategy even though there is a large probabilistic element to the game. The game is summarised in the rules as:
 
 >*Play cards to earn dice, which you will roll to defeat a fierce array of creatures, or capture magical items that may help you along the way. Whoever earns the most victory points wins.*
 
-The players play Adventurer cards to capture Dragonwood cards. The adventurer cards are numbered 1-12 and are of 5 different colours. A player can attack in 3 ways:
+The players play Adventurer cards from their hand of up to 9 to capture one of 5 Dragonwood cards. The adventurer cards are numbered 1-12 and are of 5 different colours. A player can attack in 3 ways:
 
 - Strike - play cards that are in order regardless of colour.
 - Stomp - play cards that are all the same number.
 - Scream - play cards that are all the same colour.
 
-The player gets a dice per card and then uses them to defeat Dragonwood cards to earn either that cards points value or enhancement.
+The player gets a dice per card they are attacking with and uses them to defeat Dragonwood cards.
 
-The decision to use which cards in a players hand to try an defeat which Dragonwood cards is the issue we're looking to solve. I'm hoping to be able to get an AI  to identify which cards to use to defeat the Dragonwood cards and also which cards to target to give it the bet chance of winning.
+The Dragonwood cards being attacked have different defence values for each type of attack and the player must get that value or higher to beat that card. The Dragonwood cards can be either creatures that give the player victory points when beaten or enhancements which give the user extra abilities or modifiers to their dice roll.
 
 One point to note is that the dice are 6 sided dice but with the values 1, 2, 2, 3, 3, 4. This gives the dice an [Expected Value](https://en.wikipedia.org/wiki/Expected_value) per roll of 2.5.
 
@@ -33,6 +29,10 @@ An example attack is included below to illustrate the decision making process.
 ![Dragonwood Example Decision](./docs/Dragonwood%20Example%20Decision.png "An Example Attack") |
 :--: |
 Example attack |
+
+Once the game is over whoever has the most victory points wins.
+
+The decision to use which cards in a players hand to try an defeat which Dragonwood cards is the decision we are trying to get an AI to make. I'm hoping to be able to get an AI to identify which cards to use to defeat the Dragonwood cards and also which cards to target to give it the best chance of winning.
 
 ## Goals
 
