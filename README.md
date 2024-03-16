@@ -26,9 +26,9 @@ One point to note is that the dice are 6 sided dice but with the values 1, 2, 2,
 
 An example attack is included below to illustrate the decision making process.
 
-![Dragonwood Example Decision](./docs/Dragonwood%20Example%20Decision.png "An Example Attack") |
-:--: |
-Example attack |
+|![Dragonwood Example Decision](./docs/Dragonwood%20Example%20Decision.png "An Example Attack") |
+| :--: |
+| Example attack |
 
 The decision to use which cards in a players hand to try an defeat which Dragonwood cards is the decision we are trying to get an AI to make. I'm hoping to be able to get an AI to identify which cards to use to defeat the Dragonwood cards and also which cards to target to give it the best chance of winning.
 
