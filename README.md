@@ -117,17 +117,15 @@ Learning diagram |
 
 There are mutliple different techniques within reinforcement learning, for this specific problem I investigated the below two:
 
-- [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A reinforcement learning technique where multiple runs of the game would produce a table with the best action for every possible move a player can make.
+- [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A reinforcement learning technique where multiple runs of the game produce a table with the best action for every possible move a player can make.
 
 - [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture.
 
-#### 
-
 #### Q-Learning
 
-Q-learning is a branch of Reinforcement learning where an agent, learns by iterating over the possible actions multiple times to which actions lead to the best outcomes. It does this through the generation and iterative update of what's known as a Q-Learning Table.
+Q-learning is a branch of Reinforcement learning where the agent learns by iterating over the possible actions multiple times to learn which actions lead to the best outcomes. It does this through the generation and iterative update of what's known as the Q-Learning Table.
 
-The Q-Learning Table is a $N \times M$ matrix Q with:
+The Q-Learning Table is a $N \times M$ matrix $Q$ with:
 
 - $N$ being the number of possible states
 - $M$ being the number of possible actions
@@ -157,15 +155,15 @@ Given this definition the action-state space does become quite large.
 
 - For a player's hand it could be up to 9 cards chosen without replacement from the deck of 62 which gives us 24,228,029,107 hands.
 
-- For the landscape it could be any combination of 5 cards from the 34 cards available which gives up 331,212.
+- For the cards to attack it could be any combination of 5 cards from the 34 cards available which gives up 331,212.
 
-A very large action-state space means that the model will need to be run longer to make sure all possible combinations are investigated. One way to reduce the action-state space would be to simplify how the state is represented or to use Deep Q-Learning which uses a neural network to represent the Q-table. However, I felt that there might be other algorithms and techniques out there that would allow me to train the AI without simplification.
+A very large action-state space means that the model will need to be run longer to make sure all possible combinations are investigated multiple times. One way to reduce the action-state space would be to simplify how the state is represented or to use Deep Q-Learning which uses a neural network to represent the Q-table. However, I felt that there might be other algorithms and techniques out there that would allow me to train the AI without simplification. this leads us to my second technique.
 
 #### NEAT Intro
 
 NeuroEvolution of Augmenting Topologies (NEAT) is an algorithm developed in 2002 to generate and vary neural networks in a way based on genetic principals. The algorithm varies both the weights, biases and structure of the neural network by mutating and reproducing neural networks to find the best structure to maximise the reward function.
 
-One of the advantages of NEAT is it can handle continuous or multi-dimensional state spaces. This fits our problem quite well from my research into Q-Learning.
+One of the advantages of NEAT is it can handle continuous or multi-dimensional state spaces. This fits our problem quite well.
 
 I heard about NEAT and it's applicability to my problem through a youtube video that taught an AI to play Monopoly. It's a very interesting watch and is very useful as it shares a lot of the challenges I faced in my problem. Namely, how do I factor in probability in teaching an AI and how do I encode a large and complex state space. It's an interesting watch and includes a link to a github page which was invaluable when I was working through this problem.
 
