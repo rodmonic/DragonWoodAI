@@ -211,8 +211,9 @@ Current card in attack option
 Current dragonwood cards available to attack
 Selected dragonwood card to attack.
 All players current points
-context 
+Context on how far into the game you are.
 
+This resulted in a input layer with 82 neurons.
 
 #### Experiments
 
