@@ -55,7 +55,7 @@ I did make a number of simplifying assumptions that shouldn't affect the overall
 
 - I removed certain cards that are only chance based and effect all players with the same probability. These shouldn't affect how the AI plays over a large number of iterations.
 
-- Certain enhancements I did not model and I just focussed on the cards that modify a users score. I also only dealt with permanent enhancements not ones that require the AI to decide whether to use them on each attack. This allows the AI to focus on the task of attacking and can be added in later once a successful algorithm and system have been developed.
+- Certain enhancements I did not model and I just focussed on cards that modify a users dice roll. I also only dealt with permanent enhancements not ones that require the AI to decide whether to use them on each attack. This allows the AI to focus on the task of attacking and can be added in later once a successful algorithm and system have been developed.
 
 - As strategy will be slightly different dependant on the number of players, Initially I will play with 4 players; one controlled by AI (I called her Alice) and the other 3 by the deterministic algorithm (Bob, Charles and Dylan).
 
@@ -67,7 +67,7 @@ After the model was created I needed to develop a rule based approach to selecti
 1. For each card combo work out the expected value of the number of dice. This is the number of cards times by the Expected Value of the dice - 2.5.
 1. Add any modifiers from enhancements
 1. Take away the score on the card that is trying to be captured.
-1. Select the options with the lowest positive score.
+1. Pick the options with the lowest positive score.
 
 ![DragonWoodAI Deterministic Algorithm](./docs/Dragonwood%20Determinsitic%20Algorithm.png "Example Deterministic Decision") |
 :--: |
