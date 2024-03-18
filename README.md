@@ -26,7 +26,7 @@ One point to note is that the dice are 6 sided dice but with the values 1, 2, 2,
 
 An example attack is included below to illustrate the decision making process.
 
-|![Dragonwood Example Decision](./docs/Dragonwood%20Example%20Decision.png "An Example Attack") |
+| ![Dragonwood Example Decision](./docs/Dragonwood%20Example%20Decision.png "An Example Attack") |
 | :--: |
 | Example attack |
 
@@ -183,12 +183,12 @@ Once networks have been generated/mutated and their fitness calculated, new netw
 | :--: |
 | reproduction |
 
-The process is repeated for multiple generations with mutation, variation in the weights and reproduction all happening according to various hyperparameters within the process. Luckily all this is handled by a brilliant implementation of the algorithm [neat library]
+The process is repeated for multiple generations with mutation, variation in the weights and reproduction all happening according to various hyperparameters within the process. Luckily all this is handled by a brilliant implementation of the algorithm in the [Neat-Python](https://neat-python.readthedocs.io/en/latest/index.html) library. 
 
 
 #### NEAT Process
 
-Now we have a technique selected and before we go into the important step of input encoding I thought it would be good to cover at a high level how the environment, agent and reward function are going to be used with this technique. All of the below is implemented using the [Neat-Python](https://neat-python.readthedocs.io/en/latest/index.html) package.
+Now we have a technique selected and before we go into the important step of input encoding I thought it would be good to cover at a high level how the environment, agent and reward function are going to be used with this technique. All of the below is implemented using the  package.
 
 1. A network is provided by the NEAT algorithm.
 1. This network is then passed to the Dragonwood game and assigned to the Alice player.
