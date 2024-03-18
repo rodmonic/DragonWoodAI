@@ -271,7 +271,7 @@ class Game():
             for index, attack_option in enumerate(attack_options):
 
                 modifiers = getattr(player, attack_option[0] + "_modifier")
-                # check if it is a "bad descision" (i.e. impossible for the AI to win that card) 
+                # check if it is a "bad decision" (i.e. impossible for the AI to win that card) 
                 # and skip that card
                 if (len(attack_option[1])*4 + modifiers) < (getattr(card, attack_option[0])):
                     continue

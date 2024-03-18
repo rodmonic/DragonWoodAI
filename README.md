@@ -47,9 +47,9 @@ As a stretch goal for this activity I want to leave as much of the game logic to
 
 The first step of the process is to create a model within python to allow me to play dragonwood, based on the [ruleset](https://aadl.org/files/catalog_guides/Dragonwood%20-%20rules.pdf) published online. To do this I created a custom class within python that contained all the objects and methods to complete a game. A simplified version of this model is included below. I have left off the attributes and methods for simplicity
 
-![DragonWoodAI Object Model](./docs/Dragonwood%20Object%20Model.png "Object Model") |
-:--: |
-Dragonwood model diagram |
+| ![DragonWoodAI Object Model](./docs/Dragonwood%20Object%20Model.png "Object Model") |
+| :--: |
+| Dragonwood model diagram |
 
 I did make a number of simplifying assumptions that shouldn't affect the overall gameplay but will make the model more streamlined.
 
@@ -69,9 +69,9 @@ After the model was created I needed to develop a rule based approach to selecti
 1. Take away the score on the card that is trying to be captured.
 1. Pick the options with the lowest positive score.
 
-![DragonWoodAI Deterministic Algorithm](./docs/Dragonwood%20Determinsitic%20Algorithm.png "Example Deterministic Decision") |
-:--: |
-example rule based decision |
+| ![DragonWoodAI Deterministic Algorithm](./docs/Dragonwood%20Determinsitic%20Algorithm.png "Example Deterministic Decision") |
+| :--: |
+| example rule based decision |
 
 #### Sensitivity Analysis
 
@@ -89,9 +89,9 @@ To find the best values for a and b I kept 3 players' $a$ and $b$ values constan
 
 $$(c \times (2.50+0.38)-0.13) - score$$
 
-![Sensitivity Analysis](./docs/sentivity%20analysis.png "Sensitivity Analysis") |
-:--: |
-Search matrix for values of $a$ and $b$ |
+| ![Sensitivity Analysis](./docs/sentivity%20analysis.png "Sensitivity Analysis") |
+| :--: |
+| Search matrix for values of $a$ and $b$ |
 
 ### Goal 3 - Dragonwood AI
 
@@ -111,9 +111,9 @@ Reinforcement learning involves the interatiom of the following elements:
 
 - **Agent.** An AI controlled user that can perform actions on the environment given a game state and receives rewards. In our case there will be a single AI agent and a number of rule based users that will perform actions but which we wont refer to as Agents for clarity. We will refer to our AI controlled agent as Alice throughout.
 
-![Learning Diagram](./docs/Learning%20diagram.png "Learning Diagram") |
-:--: |
-Learning diagram |
+| ![Learning Diagram](./docs/Learning%20diagram.png "Learning Diagram") |
+| :--: |
+| Learning diagram |
 
 There are mutliple different techniques within reinforcement learning, for this specific problem I investigated the below two:
 
@@ -163,57 +163,77 @@ A very large action-state space means that the model will need to be run longer 
 
 NeuroEvolution of Augmenting Topologies (NEAT) is an algorithm developed in 2002 to generate and vary neural networks in a way based on genetic principals. The algorithm varies both the weights, biases and structure of the neural network by mutating and reproducing neural networks to find the best structure to maximise the reward function.
 
-One of the advantages of NEAT is it can handle continuous or multi-dimensional state spaces. This fits our problem quite well.
+So instead of having a fixed network architecture where the best solution is found by varying the weights and biases, NEAT varies both the actual network structure as well as the weights. In practice this means that the optimal solution can be found quicker as the network itself has a lot of impact on its utility.
 
-I heard about NEAT through a youtube video that taught an AI to play Monopoly. It's a very interesting watch and is very useful as it shares a lot of the challenges I faced in my problem. Namely, how do I factor in probability in teaching an AI and how do I encode a large and complex state space. It's an interesting watch and includes a link to a github page which was invaluable when I was working through this problem.
+#### NEAT Algorithm
 
-[![](https://img.youtube.com/vi/dkvFcYBznPI/0.jpg)](https://www.youtube.com/watch?v=dkvFcYBznPI)
+The algorithm works by starting with a user defined input and output layer. In our case it will be our attack option encoding as an input and our output will be a number in \[0,1\] to show how good the network thinks that move is.
+
+
+
+- 
+
+
+
 
 #### NEAT Process
 
-Now we have a technique selected and before we go into the important step of input encoding I thought it would be good to cover at a high level how the environment, agent and reward function are going to be used with this technique. All of the below is implemented using the [Neat-Python](https://neat-python.readthedocs.io/en/latest/index.html) packaage.
+Now we have a technique selected and before we go into the important step of input encoding I thought it would be good to cover at a high level how the environment, agent and reward function are going to be used with this technique. All of the below is implemented using the [Neat-Python](https://neat-python.readthedocs.io/en/latest/index.html) package.
 
 1. A network is provided by the NEAT algorithm.
 1. This network is then provided to the Dragonwood game and assigned to the Alice player.
 1. A game is then played between Alice and the 3 other players.
-1. Each time Alice attacks, the environment provides a list of all possible combinations of attacking cards and dragonwood cards to attack. 
+1. Each time Alice attacks, the environment provides a list of all possible combinations of attacking cards and dragonwood cards to attack.
 1. Each attack combination is then encoded and inputted into the network.
 1. The attack combination with the highest score from the network is then enacted.
 1. This is repeated until the game ends.
 1. The reward is calculated for that network and game.
-1. To make sure the networks are given a chance to understand the implications of their weightings and architecture 2000 games are run and Aliec's average score passed to the NEAT algorithm. 
-1. The NEAT algorithm then varies the networks based on the reward gained from the game. 
+1. To make sure the networks are given a chance to understand the implications of their weightings and architecture 2000 games are run and Alice's average score passed to the NEAT algorithm.
+1. The NEAT algorithm then varies the networks based on the reward gained from the game.
 
 This process is iterated until a certain number of iterations is passed or the fitness function exceeds a user specified limit.
 
+|![NEAT Process](./docs/NEAT%20Process.png "NEAT Process") |
+| :--: |
+| NEAT PRocess |
+
 #### Reward Function
 
-The reward function should be derived to make sure that the correct behaviour is being encouraged through the learning process. The reward function outputs a float number with higher being better. Initially, given our stretch goal of trying to make the AI learn rules instead of imposing rules on it, the AI was provided with a full list of possible attack options including ones that were statistically not possible to attain. I.e. the score of the card was higher than the highest possible dice roll for that option. 
+The reward function should be derived to make sure that the correct behaviour is being encouraged through the learning process. The reward function outputs a float number with higher being better. Initially, given our stretch goal of trying to make the AI learn rules instead of imposing rules on it, the AI was provided with a full list of possible attack options including ones that were statistically not possible to attain. I.e. the score of the card was higher than the highest possible dice roll for that option.
 
 The first iteration of our Reward function was simple:
 
-> The reward would be the amount of points obtained by the network in a game.
-
-Over the process of this I had to change the reward function many times to try and correct the AI's behaviour and improve it's chance of winning.
+> The reward would be the average amount of points obtained by the network in a game.
 
 #### Input Encoding
 
-Now I have a reward function, a learning algorithm and a high level process the final piece of the puzzle is how do I encode the game state to input into the neural network. This step was actually what took the longest time and included much searching of stack overflow and bothering ChatGPT. For the encoding to be successful it must:
+Now I have a reward function, a learning algorithm and a high level process, the final piece of the puzzle is how do I encode the game state to input into the neural network. This step was actually what took the longest time and included much searching of stack overflow and bothering ChatGPT.
+
+For the encoding to be successful it must:
 
 - Include all relevant information that the netowrk needs to make a decision.
-- Be a 1 dimensional array of floats within the range [0,1]
-- Be as simple as possible to allow the Neural Network to recognise the relationships with the state, actions and rewards.
+- Be a $n \times 1$ array of floats within the range \[0, 1\]
+- Be as simple as possible to allow the Neural Network to recognise the relationships between the state, actions and reward function.
 
 For each attack option the following information would be encoded:
 
-Current cards in players hand
-Current card in attack option
-Current dragonwood cards available to attack
-Selected dragonwood card to attack.
-All players current points
-Context on how far into the game you are.
+- Current cards in players hand and what cards are being used to attack - encoded as a vector of length 62 representing all cards with:
 
-This resulted in a input layer with 82 neurons.
+  - 0.5 if the card is in the hand but not in the attack option
+  - 1.0 of the card is in the hand and in the attack option
+  - 0.0 otherwise
+
+- Current dragonwood cards available to attack and which card to attack - encoded as a vector of length 21 representing all creatures and enhancements with:
+
+  - 0.5 if the card is available but not being attacked
+  - 1.0 of the card is available and selected for attack
+  - 0.0 otherwise
+
+- All players current points - encoded as a vector of length 4 with each element represented as the players score / 50 to get it within the rangel [0,1]
+
+- Context on how far into the game you are - encoded as a vector of length 2.
+
+This resulted in a input layer with 86 neurons.
 
 #### Experiments
 
@@ -224,11 +244,6 @@ This resulted in a input layer with 82 neurons.
 #### Results
 
 ## initial encoding
-
-62 neurons to model the current hand, 1 if the player has that card and 2 if it's part of the attack option
-34 neurons to model the current landscape 1 if the player has that card and 2 if it's part of the attack option
-4 neurons for the points for each player
-1 neuron for the number of game ender cards still out there
 
 ### series 1
 
@@ -276,8 +291,6 @@ Generation time: 431.918 sec (425.567 average)
 but all normalised to \[0,1\]
 
 Managed to get around 7 fitness after 60 generations
-
-
 
 ## adjusted fitness function
 
@@ -386,3 +399,10 @@ Connections:
         DefaultConnectionGene(key=(-1, 0), weight=9.387252634764408, enabled=True)
         DefaultConnectionGene(key=(5309, 3645), weight=0.43687731206410607, enabled=True)
 PS C:\Users\DominicMcCaskill\repos\DragonWoodAI> 
+
+
+#### References
+
+I heard about NEAT through a youtube video that taught an AI to play Monopoly. It's a very interesting watch and is very useful as it shares a lot of the challenges I faced in my problem. Namely, how do I factor in probability in teaching an AI and how do I encode a large and complex state space. It's an interesting watch and includes a link to a github page which was invaluable when I was working through this problem.
+
+[![](https://img.youtube.com/vi/dkvFcYBznPI/0.jpg)](https://www.youtube.com/watch?v=dkvFcYBznPI)
