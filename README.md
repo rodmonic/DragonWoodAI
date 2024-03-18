@@ -188,7 +188,7 @@ The process is repeated for multiple generations with mutation, variation in the
 
 #### NEAT Process
 
-Now we have a technique selected and before we go into the important step of input encoding I thought it would be good to cover at a high level how the environment, agent and reward function are going to be used with this technique. All of the below is implemented using the  package.
+Now we have a technique selected and before we go into the important step of input encoding I thought it would be good to cover at a high level how the environment, agent and reward function are going to be used with this technique.
 
 1. A network is provided by the NEAT algorithm.
 1. This network is then passed to the Dragonwood game and assigned to the Alice player.
@@ -246,6 +246,10 @@ This step was actually what took the longest time and included much searching of
 This resulted in a input layer with 86 neurons.
 
 #### Experiments
+
+Our aim with all of these networks is to beat the rule based approach so to give me a number to aim for I ran the algorithm but only used the rule based appoach, this gave me an everage score of around 14 per game. For all of our experments we need for the AI to be able to get more than this to say we have been successful.
+
+Our initial experiments 
 
 #### Updated Encoding
 
