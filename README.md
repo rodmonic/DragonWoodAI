@@ -76,7 +76,7 @@ After the model was created I needed to develop a rule based approach to selecti
 
 #### Sensitivity Analysis
 
-As part of deciding on the best algorithm i performed some analysis on what is the most successful formula for a rule based algorithm. To work out the the values of a and b that are most successful in the below formula:
+As part of deciding on the best algorithm I performed some analysis on what is the most successful formula for a rule based algorithm. To work out the the values of a and b that are most successful in the below formula:
 
 $$(c \times (Ev_{dice}+a)+b)- score$$
 
@@ -96,7 +96,7 @@ $$(c \times (2.50+0.38)-0.13) - score$$
 
 ### Goal 3 - Dragonwood AI
 
-#### Intro to reinforcement learning
+#### Introduction to reinforcement learning
 
 Reinforcement Learning is a paradigm within machine learning where an AI controlled agent learns optimal behaviour within an environment by exploring actions and seeing their impact on a reward function. The main advantage of reinforcement learning is that we do not need a labelled data set on which to train our model, it also works well within games as we have an easily identifiable agent in the form of players.
 
@@ -172,7 +172,7 @@ The algorithm works by starting with a user defined input and output layer. In o
 
 The input and output nodes will stay constant through the evolution but nodes can and will be added to the hidden layer and connections to those nodes will also be added according to the configuration of the process. This process is known as **mutation**.
 
-| ![Generation of networks](./docs/NEAT%20networks.png "Neat Networks") |
+| ![Generation of networks](./docs/NEAT%20networks.png "NEAT Networks") |
 | :--: |
 | Base Networks |
 
@@ -316,9 +316,9 @@ This encoding reduces the number of input nodes from 86 to 11.
 
 When the process is running it can take hours to complete so I usually ran it in the evening or over the weekend. So I started it running on a Friday evening and went to bed.
 
-#### success
+#### Success
 
-So after over 200 generations of the NEAT process the network was 
+So after over 200 generations I ended Up with a network with a score of 16.6885. We now has a network that could compete with, and hopefully beat, my rule based algorithm.  
 
 Population's average fitness: 8.94476 stdev: 5.79052
 Best fitness: 16.38450 - size: (8, 14) - species 44 - id 22335
