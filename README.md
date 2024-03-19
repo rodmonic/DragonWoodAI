@@ -12,11 +12,12 @@ The game itself is quite simple and easy to learn but there are a number of deci
 
 >*Play cards to earn dice, which you will roll to defeat a fierce array of creatures, or capture magical items that may help you along the way. Whoever earns the most victory points wins.*
 
-The players play Adventurer cards from their hand of up to 9 to capture one of 5 Dragonwood cards. The adventurer cards are numbered 1-12 and are of 5 different colours. A player can attack in 3 ways:
+The players play Adventurer cards from their hand of up to 9 to capture one of 5 Dragonwood cards. The adventurer cards are numbered 1-12 and are of 5 different colours. A player can make the following 4 decisions:
 
-- Strike - play cards that are in order regardless of colour.
-- Stomp - play cards that are all the same number.
-- Scream - play cards that are all the same colour.
+- Strike - attack with cards that are in order regardless of colour.
+- Stomp - attack with cards that are all the same number.
+- Scream - attack with cards that are all the same colour.
+- Reload - Draw a card
 
 The player gets a dice per card they are attacking with and uses them to defeat Dragonwood cards.
 
@@ -194,7 +195,8 @@ Now we have a technique selected and before we go into the important step of inp
 1. A game is then played between Alice and the 3 other players.
 1. Each time Alice attacks, the environment provides a list of all possible combinations of attacking cards and Dragonwood cards to attack.
 1. Each attack combination is then encoded and inputted into the network.
-1. The attack combination with the highest score from the network is then enacted.
+1. If any combination score from the network is over a certain limit, in our case 0.33, the attack combination with the highest score from the network is selected, otherwise draw a card.
+1. The decision is then enacted by the environment.
 1. This is repeated until the game ends.
 1. The reward is calculated for that network and game.
 1. To make sure the networks are given a chance to understand the implications of their weightings and architecture 2000 games are run and Alice's average score passed to the NEAT algorithm.
@@ -212,7 +214,7 @@ The reward function should be derived to make sure that the correct behaviour is
 
 The first iteration of our Reward function was simple:
 
-> The reward would be the average amount of points obtained by the network in a game.
+> *The reward would be the average amount of points obtained by the network in a game.*
 
 #### Input Encoding
 
@@ -238,7 +240,7 @@ This step was actually what took the longest time and included much searching of
   - 1.0 of the card is available and selected for attack
   - 0.0 otherwise
 
-- All players current points - encoded as a vector of length 4 with each element represented as the players score / 50 to get it within the rangel \[0,1\]
+- All players current points - encoded as a vector of length 4 with each element represented as the players score / 50 to get it within the range \[0,1\]
 
 - Context on how far into the game you are - encoded as a vector of length 2.
 
@@ -246,11 +248,14 @@ This resulted in a input layer with 86 neurons.
 
 #### Experiments
 
+
 Our aim with all of these networks is to beat the rule based approach so to give me a number to aim for I ran the algorithm but only used the rule based approach, this gave me an average score of around 14 per game. For all of our experiments we need for the AI to be able to get more than this to say we have been successful.
 
-My initial experiments weren't very successful and resulted in an average fitness of around 2-3 with a best fitness of 4. After analysis of the code and what actions the network was no selecting I found the following problems
+#### Experiment 1
 
-- The network was selecting options where it was weren't mathematically possible. I.e. the total card score was greater than any possible dice score. Interestingly this is what my children used to do.
+My initial runs weren't very successful and resulted in an average fitness of around 2-3 with a best fitness of 4, nowhere near our target of 14. After analysis of the code and reviewing the actions the network was taking I found the following problems
+
+- The network was selecting options where it was weren't mathematically possible to win. i.e. the total card score was greater than any possible dice score. Interestingly this is what my children used to do.
 
 - The encoding had some bugs in that meant it wasn't presenting a consistent state.
 
@@ -258,132 +263,62 @@ My initial experiments weren't very successful and resulted in an average fitnes
 
 - There was an error in the encoding when there was was 2 of the same Dragonwood cards available to attack.
 
-To try and stop the network from selecting options that weren't valid i changed the reward function to:
+To try and stop the network from selecting options that weren't valid I changed the reward function to:
 
-> The reward would be the average amount of points obtained by the network in a game minus 0.5 for every time the network selects an impossible attack option.
+> *The reward would be the average amount of points obtained by the network in a game minus 0.5 for every time the network selects an impossible attack option.*
 
-#### Updated Encoding
+#### Experiment 2
 
-#### Success
+After updating the encoding and reward function I was able to be a bit more successful. The network was now quickly learning not to play impossible card combinations and was eventually able to have an average score of 3 and with a best network value of 7. This is still not near the levels needed.
 
-#### Results
+After review of the actions selected by the network it seemed to be drawing cards more often than needed and would only attack high value cards when it had a good chance of winning. This conservatism meant that cards with smaller attack values and points were being ignored completely. The cards were even being ignored when the network had valid attacks that had a very good chance of winning. It seems that the new reward function was causing the network to learn to be very cautious and the points it won for the smaller cards was not enough for it to prioritise those cards.
 
-## initial encoding
+I then tried the following amendments to the reward function:
 
-### series 1
+>- *Added a +10 to the reward when the player won the game.*
+>- *Added -0.25 to the reward when the player drew a card that took it over the max hand size of 9 which would cause it to discard a card.*
 
-- population 20
-- iterations per run 100
-- activation function tanh
-- score as fitness
+These changes resulted in a slight increase in the average score to 7 but still didn't give me the changes I needed.
 
-Population's average fitness: 2.50200 stdev: 0.78152
-Best fitness: 3.97000 - size: (1, 81) - species 1 - id 197
-Average adjusted fitness: 0.506
-Mean genetic distance 0.533, standard deviation 0.279
-Population of 20 members in 1 species:
-   ID   age  size  fitness  adj fit  stag
-  ====  ===  ====  =======  =======  ====
-     1   19    20      4.0    0.506     5
+#### Experiment 3
 
-### series 2
+It seems that the network was still being conservative and was drawing cards when it shouldn't be. A measure of success of playing in Dragonwood is the amount of value you get per card. The more cards you discard the less chance to get points you have. As a final attempt to get a less conservative player I changed the function to try and incorporate this. The new function was:
 
-- population 20
-- iterations per run 1000
-- activation function tanh
-- score as fitness
+ $$\frac{score}{number\;of\;discarded\;cards} + {invalid\;choices}\times-0.5$$
 
- ****** Running generation 12 ******
+ Unfortunately this had the opposite effect and after a few generations the network was only drawing cards and doing nothing else.
 
-Population's average fitness: 2.02415 stdev: 0.62575
-Best fitness: 3.11800 - size: (1, 82) - species 1 - id 203
-Average adjusted fitness: 0.492
-Mean genetic distance 0.656, standard deviation 0.287
-Population of 20 members in 1 species:
-   ID   age  size  fitness  adj fit  stag
-  ====  ===  ====  =======  =======  ====
-     1   12    20      3.1    0.492     1
-Total extinctions: 0
-Generation time: 431.918 sec (425.567 average)
+ #### Experiment 4
 
-## next encoding
+ I was starting to think that the state encoding was too complicated to allow the network to learn from. Before going back to the drawing board I decided to only provide attack options to the network that were possible. This does go against our stretch goal of trying to let the network learn the game rules but at this point I felt it was a good compromise to make.
 
-62 neurons to model the current hand, 1 if the player has that card and 2 if it's part of the attack option
-34 neurons to model the current landscape 1 if the player has that card and 2 if it's part of the attack option
-4 neurons for the points for each player
-1 neuron for the number of game ender cards still out there
+ Once this had been implemented the network did converge on an answer much quicker and we saw a slight increase in the best performing network. However the best score of 8 was still pretty far from the value needed.
 
-but all normalised to \[0,1\]
+#### Experiment 5
 
-Managed to get around 7 fitness after 60 generations
+At this point i had been working on getting the network right for a month and had changed quite a few variables with minimal change in the resultant reward function. I felt therefore it was time to review the input encoding. Simplification of the encoding would mean that more of the games logic would be abstracted away from the network but the current approach was not yielding results.
 
-## adjusted fitness function
-
-Added negative -0.5 for each impossible card and adventurer combination the model chooses.
-
-## adjusted config
-
-Have the mean as the fitness function instead of Max
-### Experiment 3
- ****** Running generation 113 ******
-
-Population's average fitness: 3.09993 stdev: 2.53612
-Best fitness: 6.70325 - size: (2, 73) - species 1 - id 13201
-Average adjusted fitness: 0.742
-Mean genetic distance 1.695, standard deviation 0.326
-Population of 150 members in 2 species:
-   ID   age  size  fitness  adj fit  stag
-  ====  ===  ====  =======  =======  ====
-     1  113    79      3.6    0.774    43
-     4   64    71      2.7    0.710    40
-Total extinctions: 0
-Generation time: 1231.696 sec (1207.355 average)
-Saving checkpoint to neat-checkpoint-113
-
-Noticed that the AI is reloading a lot so may need to adjust the probablity that triggers a reload.
-
-### Experiment 4
-changed the cut off for a reload decision to 0.33 as in the logs the AI seemed to be reloading a lot.
-
-
-### Noticed an error in my encoding 
-- that would allow over 1 for a landsacpe with the same card in twice
-- order of players scores were shuffled each time so was effectively adding confusion into the network.
-- also added in 10 more fitness points if they actaully win.
-
-got to ~7 max fitness by 70 but then struggled.
-
-### Experiment 5
-added a negative 0.25 fitness penalty for drawing a card when it would result in losing a card.
-This seemed to confuse the AI and make it select invalid options more and also it didn't increase the score
-
-### Experiment 6
-Chnaged fitness function completely so it is
-
-score/number_of_adventure cards discarded + number of invlaid options chose *0.5
-
-This caused the AI to only reload
-
-### Experiments 7
-Change everything so only valid options are presented to the AI
-
-quicker to converge but still only managed 7-8
-
-### Experiment 8
-
-Changed how the game state is encoded to:
+So I decided to simplify the encoding trying to put the least amount of information needed not worrying about abstracting away information. I ended up with the following encoding:
 
 * length of attacking hand
-* score to beat
-* number of points
-* scream modifier
-* strike modifier
-* stomp modifier
+* score to beat on selected Dragonwood card
+* number of points of selected Dragonwood card
+* scream modifier if the card is an enhancement
+* strike modifier if the card is an enhancement
+* stomp modifier if the card is an enhancement
 * player 1 score
 * player 2 score
 * player 3 score
 * player 4 score
-* number of game enders
+* game length context
+
+This encoding reduces the number of input nodes from 86 to 11.
+
+When the process is running it can take hours to complete so I usually ran it in the evening or over the weekend. So I started it running on a Friday evening and went to bed.
+
+#### success
+
+So after over 200 generations of the NEAT process the network was 
 
 Population's average fitness: 8.94476 stdev: 5.79052
 Best fitness: 16.38450 - size: (8, 14) - species 44 - id 22335
