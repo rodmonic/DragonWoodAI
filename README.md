@@ -183,7 +183,7 @@ Once networks have been generated/mutated and their fitness calculated, new netw
 | :--: |
 | reproduction |
 
-The process is repeated for multiple generations with mutation, variation in the weights and reproduction all happening according to various hyperparameters within the process. Luckily all this is handled by a brilliant implementation of the algorithm in the [Neat-Python](https://neat-python.readthedocs.io/en/latest/index.html) library. 
+The process is repeated for multiple generations with mutation, variation in the weights and reproduction all happening according to various hyperparameters within the process. Luckily all this is handled by a brilliant implementation of the algorithm in the [Neat-Python](https://neat-python.readthedocs.io/en/latest/index.html) library. The library also tracks a measure of the genetic diversity within the population and maintains a record of the best performing networks and whether a species has become stagnant i.e. has stopped improving.
 
 
 #### NEAT Process
@@ -249,7 +249,9 @@ This resulted in a input layer with 86 neurons.
 
 Our aim with all of these networks is to beat the rule based approach so to give me a number to aim for I ran the algorithm but only used the rule based appoach, this gave me an everage score of around 14 per game. For all of our experments we need for the AI to be able to get more than this to say we have been successful.
 
-Our initial experiments 
+My initial experiments weren't very sucessful and resulted in an average fitness of around 2-3 with a best fitness of 4. After analysis of the code and what actions the network was no selecting I found the following problems
+
+- The network was selecting options where it was werent mathematically possible. 
 
 #### Updated Encoding
 
