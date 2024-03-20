@@ -212,9 +212,9 @@ This process is repeated until a certain number of iterations is passed or the r
 
 The reward function should be derived to make sure that the correct behaviour is being encouraged through the learning process. The reward function outputs a float number with higher being better. Initially, given our stretch goal of trying to make the AI learn rules instead of imposing rules on it, the AI was provided with a full list of possible attack options including ones that were statistically not possible to attain. I.e. the score of the card was higher than the highest possible dice roll for that option.
 
-The first iteration of our Reward function was simple:
+The first iteration of our Reward function was simple it would be the average score recevied by that network:
 
-> *The reward would be the average amount of points obtained by the network in a game.*
+$$\frac{\sum {score}}{number\ of\ iterations}$$
 
 #### Input Encoding
 
@@ -263,9 +263,10 @@ My initial runs weren't very successful and resulted in an average fitness of ar
 
 - There was an error in the encoding when there was was 2 of the same Dragonwood cards available to attack.
 
-To try and stop the network from selecting options that weren't valid I changed the reward function to:
+To try and stop the network from selecting options that weren't valid I changed the reward function to be the average score per game -0.5 times the number of invalid choices:
 
-> *The reward would be the average amount of points obtained by the network in a game minus 0.5 for every time the network selects an impossible attack option.*
+$$\frac{\sum{({score}+{number\ of\ invalid\ choices} \times -0.5)}}{number\ of\ iterations}$$
+
 
 #### Experiment 2
 
@@ -273,7 +274,7 @@ After updating the encoding and reward function I was able to be a bit more succ
 
 After review of the actions selected by the network it seemed to be drawing cards more often than needed and would only attack high value cards when it had a good chance of winning. This conservatism meant that cards with smaller attack values and points were being ignored completely. The cards were even being ignored when the network had valid attacks that had a very good chance of winning. It seems that the new reward function was causing the network to learn to be very cautious and the points it won for the smaller cards was not enough for it to prioritise those cards.
 
-I then tried the following amendments to the reward function:
+I then tried the following amendments to the reward functions:
 
 >- *Added a +10 to the reward when the player won the game.*
 >- *Added -0.25 to the reward when the player drew a card that took it over the max hand size of 9 which would cause it to discard a card.*
@@ -282,11 +283,9 @@ These changes resulted in a slight increase in the average score to 7 but still 
 
 #### Experiment 3
 
-It seems that the network was still being conservative and was drawing cards when it shouldn't be. A measure of success of playing in Dragonwood is the amount of value you get per card. The more cards you discard the less chance to get points you have. As a final attempt to get a less conservative player I changed the function to try and incorporate this. The new function was:
+It seems that the network was still being conservative and was drawing cards when it shouldn't be. A measure of success of playing in Dragonwood is the amount of value you get per card. The more cards you discard the less chance to get points you have. As a final attempt to get a less conservative player I changed the function to try and incorporate this. 
 
- $$\frac{score}{number\;of\;discarded\;cards} + {invalid\;choices}\times-0.5$$
-
- Unfortunately this had the opposite effect and after a few generations the network was only drawing cards and doing nothing else.
+Unfortunately this had the opposite effect and after a few generations the network was only drawing cards and doing nothing else.
 
  #### Experiment 4
 
@@ -320,48 +319,11 @@ When the process is running it can take hours to complete so I usually ran it in
 
 So after over 200 generations I ended Up with a network with a score of 16.6885. We now has a network that could compete with, and hopefully beat, my rule based algorithm.  
 
-Population's average fitness: 8.94476 stdev: 5.79052
-Best fitness: 16.38450 - size: (8, 14) - species 44 - id 22335
-Average adjusted fitness: 0.449
-Mean genetic distance 3.107, standard deviation 0.750
-Population of 150 members in 8 species:
-   ID   age  size  fitness  adj fit  stag
-  ====  ===  ====  =======  =======  ====
-    44   24    27     10.4    0.636     3
-    45   20    21      6.9    0.421     6
-    47   17     5      1.8    0.113     2
-    48    8    32     13.4    0.817     0
-    49    5    19      7.9    0.480     1
-    50    4    19      7.6    0.461     1
-    51    4    18      7.6    0.463     2
-    52    1     9      3.3    0.201     0
-Total extinctions: 0
-Generation time: 362.522 sec (322.047 average)
-Saving checkpoint to neat-checkpoint-201
-
-Best genome:
-Key: 18633
-Fitness: 16.6885
-Nodes:
-        0 DefaultNodeGene(key=0, bias=-0.7395573638333613, response=1.0, activation=sigmoid, aggregation=sum)
-        3645 DefaultNodeGene(key=3645, bias=1.7304809219021717, response=1.0, activation=relu, aggregation=sum)
-        4321 DefaultNodeGene(key=4321, bias=1.9033812411004662, response=1.0, activation=relu, aggregation=sum)
-        5309 DefaultNodeGene(key=5309, bias=0.5905094695409188, response=1.0, activation=sigmoid, aggregation=sum)
-Connections:
-        DefaultConnectionGene(key=(-11, 3645), weight=-1.2387335143649874, enabled=False)
-        DefaultConnectionGene(key=(-10, 4321), weight=-0.6878208181792393, enabled=True)
-        DefaultConnectionGene(key=(-6, 3645), weight=0.7903554632648431, enabled=True)
-        DefaultConnectionGene(key=(-5, 3645), weight=-1.7362844731217704, enabled=True)
-        DefaultConnectionGene(key=(-5, 5309), weight=0.8831836465948204, enabled=True)
-        DefaultConnectionGene(key=(-3, 0), weight=3.060456333297272, enabled=True)
-        DefaultConnectionGene(key=(-3, 4321), weight=-0.7731497825441134, enabled=True)
-        DefaultConnectionGene(key=(-2, 0), weight=-9.989258211757239, enabled=True)
-        DefaultConnectionGene(key=(-1, 0), weight=9.387252634764408, enabled=True)
-        DefaultConnectionGene(key=(5309, 3645), weight=0.43687731206410607, enabled=True)
-PS C:\Users\DominicMcCaskill\repos\DragonWoodAI> 
 
 
 #### References
+
+If you're interested in reading more about NEAT with more detail on how reproduction and mutation work then i would recommedn reading the [original paper.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
 
 I heard about NEAT through a youtube video that taught an AI to play Monopoly. It's a very interesting watch and is very useful as it shares a lot of the challenges I faced in my problem. Namely, how do I factor in probability in teaching an AI and how do I encode a large and complex state space. It's an interesting watch and includes a link to a github page which was invaluable when I was working through this problem.
 
