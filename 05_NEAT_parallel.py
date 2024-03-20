@@ -12,9 +12,11 @@ from Dragonwood.Player import Player
 from Dragonwood.Dice import Dice
 import Dragonwood.SharedRandom as sr
 
+import visualise
+
 sr.set_seed()
 
-generations = 1
+generations = 300
 iterations = 2000
 
 def eval_genome(genome, config):
@@ -58,21 +60,25 @@ def run_neat(config_file):
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_file)
 
-    # p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-279')
+    p = neat.Population(config)
+    # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-279')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    checkpointer = neat.Checkpointer(1)
+    checkpointer = neat.Checkpointer(50)
     p.add_reporter(checkpointer)
 
     pe = neat.ParallelEvaluator(multiprocessing.cpu_count(), eval_genome)
     winner = p.run(pe.evaluate, generations)
-    print('\nBest genome:\n{!s}'.format(winner))
+    stats.save()
 
     # Save the winner.
     with open('winner-feedforward', 'wb') as f:
         pickle.dump(winner, f)
+
+    visualise.draw_net(config, winner, True)
+    visualise.plot_stats(stats, ylog=False, view=True)
+    visualise.plot_species(stats, view=True)
 
 
 if __name__ == "__main__":

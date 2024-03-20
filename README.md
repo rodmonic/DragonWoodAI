@@ -4,7 +4,9 @@
 
 I, like most parents, enjoy playing board games with my kids and one they particularly enjoy is Dragonwood. I have played quite a few games with my kids and started to wonder what the best strategy was and how I can increase my probability of winning. It seems that my kids seem to have an innate understanding of the probabilities involved and have started to beat me more and more.
 
-My approach to understanding this problem is to create a way of playing thousands of games of Dragonwood which should enable me to test out strategies and see which are most successful. Once a suitable system has been developed a stretch goal would be to train an AI to play against a deterministic opponent and see if an AI can find a better approach than I can.
+I searched online for any strategies or explanation of the probabilites involved but could find nothing so decided I would approach the problem like I would any problem I usually encounter at work. I had been aware of the AI technique of Reinforcement Learning for a while but had never had a suitable problem to apply it to.
+
+So as an excuse to get better at Dragonwood, learn an new AI technique and to write some python I decided to see if I could teach an AI to play the game better than me and try and understand what strategies it uses.
 
 ## The Game
 
@@ -19,9 +21,13 @@ The players play Adventurer cards from their hand of up to 9 to capture one of 5
 - Scream - attack with cards that are all the same colour.
 - Reload - Draw a card
 
-The player gets a dice per card they are attacking with and uses them to defeat Dragonwood cards.
+The player gets a die per card they are attacking with and uses them to defeat Dragonwood cards. The Dragonwood cards being attacked have different defence values for each type of attack and the player must get that value or higher to beat that card. 
 
-The Dragonwood cards being attacked have different defence values for each type of attack and the player must get that value or higher to beat that card. The Dragonwood cards can be either creatures that give the player victory points when beaten or enhancements which give the user extra abilities or modifiers to their dice roll.
+The Dragonwood cards can be either creatures that give the player victory points when beaten or enhancements which give the user extra abilities or modifiers to their dice roll. For example one enhancement gives the user an extra 1 point to any stomp related dice roll.
+
+| ![Grumpy Troll](./docs/Grumpy%20Troll.png "Grumpy Troll") |![Ghost Disguise](./docs/Ghost%20Disguise.png "Ghost Disguise") |
+| :--: |:--: |
+| A Grumpy Troll creature card with strike, stomp and <br> scream defence numbers (9, 11, 9) and the number of <br> points for a successful attack (5)| A Ghost Duiguise enhancement card with strike, stomp and <br> scream defence numbers (8, 7, 10) and <br> the modification the player gains if the attack <br>is sucessful (2 points added to any scream attacks) |
 
 One point to note is that the dice are 6 sided dice but with the values 1, 2, 2, 3, 3, 4. This gives the dice an [Expected Value](https://en.wikipedia.org/wiki/Expected_value) per roll of 2.5.
 
@@ -42,7 +48,7 @@ Given the scope of the problem and the initial wide variety of possibilities, I 
 1. Develop an AI that can play Dragonwood using reinforcement learning that is as good, or better than the rule based algorithm.
 1. Learn some strategies from the AI to improve my chances against my kids.
 
-As a stretch goal for this activity I want to leave as much of the game logic to be determined by the AI. So the AI should be given as little of the games' rules and should learn through its interaction with the game instead of explicit structural learning.
+As a stretch goal for this activity I want to leave as much of the game logic to be determined by the AI. So the AI should be given as little of the games' rules as possible and should learn through its interaction with the game instead of having the game structure imposed on it.
 
 ### Goal 1 - Python Model
 
@@ -65,7 +71,7 @@ I did make a number of simplifying assumptions that shouldn't affect the overall
 After the model was created I needed to develop a rule based approach to selecting an attack. This is what I will eventually judge any AI's success or failure against. After trail and error the following algorithm was developed.
 
 1. Find all possible attacks and card combinations from a players current hand.
-1. For each card combo work out the expected value of the number of dice. This is the number of cards times by the Expected Value of the dice - 2.5.
+1. For each attack option work out the Expected Value of the number of dice for that attack. This is the number of cards times by the Expected Value of the dice - 2.5.
 1. Add any modifiers from enhancements
 1. Take away the score on the card that is trying to be captured.
 1. Pick the options with the lowest positive score.
@@ -78,7 +84,7 @@ After the model was created I needed to develop a rule based approach to selecti
 
 As part of deciding on the best algorithm I performed some analysis on what is the most successful formula for a rule based algorithm. To work out the the values of a and b that are most successful in the below formula:
 
-$$(c \times (Ev_{dice}+a)+b)- score$$
+$$(c \times (Ev_{dice}+a)+b)- {card\ defence\ score}$$
 
 Where:
 
@@ -88,7 +94,7 @@ Where:
 
 To find the best values for a and b I kept 3 players' $a$ and $b$ values constant at 0 and then searched through candidate values running a thousand games for each combination and seeing which  gave the best points per turn. After running 10000 games the results showed the optimum formula was:
 
-$$(c \times (2.50+0.38)-0.13) - score$$
+$$(c \times (2.50+0.38)-0.13) - {card\ defence\ score}$$
 
 | ![Sensitivity Analysis](https://github.com/rodmonic/DragonWoodAI/blob/cb04a135d0b5841cf91336857bccf0b6db3221c4/docs/sentivity%20analysis.png "Sensitivity Analysis") |
 | :--: |
@@ -100,7 +106,11 @@ $$(c \times (2.50+0.38)-0.13) - score$$
 
 Reinforcement Learning is a paradigm within machine learning where an AI controlled agent learns optimal behaviour within an environment by exploring actions and seeing their impact on a reward function. The main advantage of reinforcement learning is that we do not need a labelled data set on which to train our model, it also works well within games as we have an easily identifiable agent in the form of players.
 
-Reinforcement learning involves the interaction of the following elements:
+The diagram and definition below shows how the various elements within a Reinforcement Learning problem interact. 
+
+| ![Learning Diagram](./docs/Learning%20diagram.png "Learning Diagram") |
+| :--: |
+| Learning diagram |
 
 - **Environment.** The environment is the entity we are a looking to learn from. In our case this is the Dragonwood game and more specifically the Dragonwood model created in Python. The environment provides the agent with information it's state and the impact of the agent's actions.
 
@@ -112,13 +122,9 @@ Reinforcement learning involves the interaction of the following elements:
 
 - **Agent.** An AI controlled user that can perform actions on the environment given a game state and receives rewards. In our case there will be a single AI agent and a number of rule based users that will perform actions but which we wont refer to as Agents for clarity. We will refer to our AI controlled agent as Alice throughout.
 
-| ![Learning Diagram](./docs/Learning%20diagram.png "Learning Diagram") |
-| :--: |
-| Learning diagram |
-
 There are multiple different techniques within reinforcement learning, for this specific problem I investigated the below two:
 
-- [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A reinforcement learning technique where multiple runs of the game produce a table with the best action for every possible move a player can make.
+- [Q-Learning](https://en.wikipedia.org/wiki/Q-learning). A technique where multiple runs of the game produce a table with the best action for every possible move a player can make.
 
 - [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture.
 
@@ -160,7 +166,7 @@ Given this definition the action-state space does become quite large.
 
 A very large action-state space means that the model will need to be run longer to make sure all possible combinations are investigated multiple times. One way to reduce the action-state space would be to simplify how the state is represented or to use Deep Q-Learning which uses a neural network to represent the Q-table. However, I felt that there might be other algorithms and techniques out there that would allow me to train the AI without simplification. this leads us to my second technique.
 
-#### NEAT Intro
+#### Introduction to NEAT
 
 NeuroEvolution of Augmenting Topologies (NEAT) is an algorithm developed in 2002 to generate and vary neural networks in a way based on genetic principals. The algorithm varies both the weights, biases and structure of the neural network by mutating and reproducing neural networks to find the best structure to maximise the reward function.
 
@@ -168,9 +174,9 @@ So instead of having a fixed network architecture where the best solution is fou
 
 #### NEAT Algorithm
 
-The algorithm works by starting with a user defined input and output layer. In our case it will be our attack option encoded as an input and our output will be a number in \[0,1\] to show how good the network thinks that move is.
+The algorithm works by starting with a user defined number of inputs and output. In our case it will be our attack option encoded as an input and our output will be a number in \[0,1\] to show how good the network thinks that move is.
 
-The input and output nodes will stay constant through the evolution but nodes can and will be added to the hidden layer and connections to those nodes will also be added according to the configuration of the process. This process is known as **mutation**.
+The input and output structure will stay constant through the evolution but nodes can and will be added to the network between the inputs and outputs and connections to those nodes will also be added according to the configuration of the process. This process is known as **mutation**.
 
 | ![Generation of networks](./docs/NEAT%20Networks.png "NEAT Networks") |
 | :--: |
@@ -182,7 +188,7 @@ Once networks have been generated/mutated and their fitness calculated, new netw
 
 | ![Reproduction](./docs/Reproduction.png "Reproduction") |
 | :--: |
-| reproduction |
+| Reproduction |
 
 The process is repeated for multiple generations with mutation, variation in the weights and reproduction all happening according to various hyperparameters within the process. Luckily all this is handled by a brilliant implementation of the algorithm in the [Neat-Python](https://neat-python.readthedocs.io/en/latest/index.html) library. The library also tracks a measure of the genetic diversity within the population and maintains a record of the best performing networks and whether a species has become stagnant i.e. has stopped improving.
 
@@ -212,7 +218,7 @@ This process is repeated until a certain number of iterations is passed or the r
 
 The reward function should be derived to make sure that the correct behaviour is being encouraged through the learning process. The reward function outputs a float number with higher being better. Initially, given our stretch goal of trying to make the AI learn rules instead of imposing rules on it, the AI was provided with a full list of possible attack options including ones that were statistically not possible to attain. I.e. the score of the card was higher than the highest possible dice roll for that option.
 
-The first iteration of our Reward function was simple it would be the average score recevied by that network:
+The first iteration of our Reward function was simple it would be the average score received by that network:
 
 $$\frac{\sum {score}}{number\ of\ iterations}$$
 
