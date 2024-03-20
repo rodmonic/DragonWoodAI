@@ -90,7 +90,7 @@ To find the best values for a and b I kept 3 players' $a$ and $b$ values constan
 
 $$(c \times (2.50+0.38)-0.13) - score$$
 
-| ![Sensitivity Analysis](./docs/sentivity%20analysis.png "Sensitivity Analysis") |
+| ![Sensitivity Analysis](https://github.com/rodmonic/DragonWoodAI/blob/cb04a135d0b5841cf91336857bccf0b6db3221c4/docs/sentivity%20analysis.png "Sensitivity Analysis") |
 | :--: |
 | Search matrix for values of $a$ and $b$ |
 
