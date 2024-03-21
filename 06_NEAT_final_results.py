@@ -14,7 +14,7 @@ import Dragonwood.SharedRandom as sr
 
 sr.set_seed()
 
-iterations = 100000
+iterations = 10000
 
 def run_genome(net):
     player_details = []
@@ -34,12 +34,13 @@ def run_genome(net):
             adventurer_deck=adventurer_deck,
             dragonwood_deck=dragonwood_deck,
             players=players,
-            dice=dice
+            dice=dice,
+            shuffle_players=True
         )  # Initialize your game with the starting state
         
         result = game.play(
             net=net,
-            debug=True
+            debug=False
         )
 
         player_details.extend(result["players_details"])

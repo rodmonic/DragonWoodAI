@@ -4,7 +4,7 @@
 
 I, like most parents, enjoy playing board games with my kids and one they particularly enjoy is Dragonwood. I have played quite a few games with my kids and started to wonder what the best strategy was and how I can increase my probability of winning. It seems that my kids seem to have an innate understanding of the probabilities involved and have started to beat me more and more.
 
-I searched online for any strategies or explanation of the probabilites involved but could find nothing so decided I would approach the problem like I would any problem I usually encounter at work. I had been aware of the AI technique of Reinforcement Learning for a while but had never had a suitable problem to apply it to.
+I searched online for any strategies or explanation of the probabilities involved but could find nothing so decided I would approach the problem like I would any problem I usually encounter at work. I had been aware of the AI technique of Reinforcement Learning for a while but had never had a suitable problem to apply it to.
 
 So as an excuse to get better at Dragonwood, learn an new AI technique and to write some python I decided to see if I could teach an AI to play the game better than me and try and understand what strategies it uses.
 
@@ -21,13 +21,13 @@ The players play Adventurer cards from their hand of up to 9 to capture one of 5
 - Scream - attack with cards that are all the same colour.
 - Reload - Draw a card
 
-The player gets a die per card they are attacking with and uses them to defeat Dragonwood cards. The Dragonwood cards being attacked have different defence values for each type of attack and the player must get that value or higher to beat that card. 
+The player gets a die per card they are attacking with and uses them to defeat Dragonwood cards. The Dragonwood cards being attacked have different defence values for each type of attack and the player must get that value or higher to beat that card.
 
 The Dragonwood cards can be either creatures that give the player victory points when beaten or enhancements which give the user extra abilities or modifiers to their dice roll. For example one enhancement gives the user an extra 1 point to any stomp related dice roll.
 
 | ![Grumpy Troll](./docs/Grumpy%20Troll.png "Grumpy Troll") |![Ghost Disguise](./docs/Ghost%20Disguise.png "Ghost Disguise") |
 | :--: |:--: |
-| A Grumpy Troll creature card with strike, stomp and <br> scream defence numbers (9, 11, 9) and the number of <br> points for a successful attack (5)| A Ghost Duiguise enhancement card with strike, stomp and <br> scream defence numbers (8, 7, 10) and <br> the modification the player gains if the attack <br>is sucessful (2 points added to any scream attacks) |
+| A Grumpy Troll creature card with strike, stomp and scream defence numbers (9, 11, 9) and the number of points for a successful attack (5)| A Ghost Disguise enhancement card with strike, stomp and scream defence numbers (8, 7, 10) and the modification the player gains if the attack is successful (2 points added to any scream attacks) |
 
 One point to note is that the dice are 6 sided dice but with the values 1, 2, 2, 3, 3, 4. This gives the dice an [Expected Value](https://en.wikipedia.org/wiki/Expected_value) per roll of 2.5.
 
@@ -338,13 +338,13 @@ The Speciation chart below shows which species of network are successful and are
 | :--: |
 | Speciation by Generation |
 
-Finally to check the networks performance against my rule based approach I run 10,000 games with Alice using the best network from the NEAT algorithm and the other players using the rule based approach with the best formula I derived based on our scenario analysis above.
+Finally to check the networks performance against my rule based approach I run 100,000 games with Alice using the best network from the NEAT algorithm and the other players using the rule based approach with the best formula I derived based on our scenario analysis above.
 
 |![Final Results](<./docs/Final Winners.png> "Final Results") |
 | :--: |
 | Final Results |
 
-While the results aren't massive we can see that Alice has managed to not only learn the right moves to make she has a slight advantage over the rule based algorithm.
+While the results aren't massive, they do show a 6% increase in chance of winning over the determinsitic algorithm. We can see that Alice has managed to not only learn the right moves to make she has a slight advantage over the rule based algorithm.
 
 To try and understand why this might be and some of the decision making process behind the algorithm I decided to investigate the weights and structure of the network. The Neat-python library has a simple tool that visualises the winning network. The first output of the tool provides us with the below network.
 
@@ -365,7 +365,7 @@ This may look confusing and messy at first glance but this is a result of how th
 | :--: |
 | Final Network Pruned |
 
-I have recoloured the input nodes that weren't affecting the output and formatted the lines between the nodes according to their weight. What we can clearly see now is that the most important nodes are the length of hand and score to beat as we would expect. The remaining nodes are of minimal importance.
+I have recoloured the input nodes yellow that weren't affecting the output and formatted the lines between the nodes according to their weight. What we can clearly see now is that the most important nodes are the length of hand and score to beat as we would expect. The remaining nodes are of minimal importance.
 
 This broadly aligns with my initial intuition on how to select a card. It should be based on how many dice are available and the score that is needed to be beaten. It is interesting however that the amount of points or the reward from the enhancement are not important to the overall output.
 
@@ -373,7 +373,26 @@ I think the slight advantage that Alice had over the rule based agents was proba
 
 #### Results and next steps
 
+If I refer back to my initial goals for the project they were:
 
+1. Create a model to allow me to play Dragonwood programmatically in Python
+1. Develop an rule based algorithm to play Dragonwood deterministically and model how a player selects which cards to attack and when.
+1. Develop an AI that can play Dragonwood using reinforcement learning that is as good, or better than the rule based algorithm.
+1. Learn some strategies from the AI to improve my chances against my kids.
+
+I would say I have achieved the first 3 goals and while I didn't get any specific strategies to use from the AI, it did effectively confirm that the rule based approach gives a very good strategy to use against my kids and the AI generated newtork provides a 7% improvement over the rule based algorithm I generated.
+
+There are a number of simplifying assumptions I've made and some limitations to my approach that do have an impact on strategy. To develop this further and to make a more relevant AI I could change the following:
+
+- Model more of the enhancement cards including temporary cards that require their own decision about whether to play them.
+
+- Allow the AI to decide which cards to discard. Currently when a player has to discard a card I have a rule based approach. This could be outsourced to the AI and may improve results.
+
+- There are certain game mechanics I have ignored as they have the same effect on all players which could be added in to make the game reflect the real game as much as possible.
+
+Overall it has been a really interesting and rewarding process and I have learnt a lot about Reinforcement Learning, Neural Networks and how to model systems in using Object Oriented programming in Python. 
+
+This process and associated techniques are applicable in multiple disparate domains, not just in games but any system where an agent takes action on a system and where a reqard function can be derived. For example if a digital twin exists of a system and maintenance actions and their impact and cost could be quantified then these processes could be used to minimise the maintenance cost of a system or to maximise availability. 
 
 #### References
 
