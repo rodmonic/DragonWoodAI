@@ -338,12 +338,36 @@ The Speciation chart below shows which species of network are successful and are
 | :--: |
 | Speciation by Generation |
 
-Finally to check the networks performance against my rule based approach I run 10,000 games with Alice using the best network from the NEAT algorithm and the other players using the rule based appraoch with the best formula I derived based on our scenario analysis above [link](#Scenario-Analysis).
+Finally to check the networks performance against my rule based approach I run 10,000 games with Alice using the best network from the NEAT algorithm and the other players using the rule based approach with the best formula I derived based on our scenario analysis above.
 
+|![Final Results](<./docs/Final Winners.png> "Final Results") |
+| :--: |
+| Final Results |
+
+While the results aren't massive we can see that Alice has managed to not only learn the right moves to make she has a slight advantage over the rule based algorithm.
+
+To try and understand why this might be and some of the decision making process behind the algorithm I decided to investigate the weights and structure of the network. The Neat-python library has a simple tool that visualises the winning network. The first output of the tool provides us with the below network.
+
+|![Final Network Full](<./docs/Final Network Full.png> "Final Network") |
+| :--: |
+| Final Network Full |
+
+Within the network we have the following elements:
+
+- Grey nodes are the input nodes
+- The blue node is the output node
+- Yellow nodes are hidden nodes connected to the input or output nodes.
+- Red nodes are hidden nodes unconnected to our data.
+
+This may look confusing and messy at first glance but this is a result of how the network is evolved. Nodes and connections are added and deleted to network by the NEAT algorithm at random. This means nodes may become disconnected from the input nodes or output nodes but are not deleted. So they have no impact on our output but are still included. Therefore any node that is not connected to the input or output node can be deleted. a "pruned" version is shown below.
+
+|![Final Network Pruned](<./docs/Final Network Pruned.png> "Final Network Pruned") |
+| :--: |
+| Final Network Pruned |
 
 #### References
 
-If you're interested in reading more about NEAT with more detail on how reproduction and mutation work then i would recommedn reading the [original paper.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
+If you're interested in reading more about NEAT with more detail on how reproduction and mutation work then I would recommend reading the [original paper.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
 
 I heard about NEAT through a youtube video that taught an AI to play Monopoly. It's a very interesting watch and is very useful as it shares a lot of the challenges I faced in my problem. Namely, how do I factor in probability in teaching an AI and how do I encode a large and complex state space. It's an interesting watch and includes a link to a github page which was invaluable when I was working through this problem.
 

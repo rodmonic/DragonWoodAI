@@ -208,7 +208,7 @@ class Game():
 
     def get_attack_option_game_state(self, attack_option: list, dragonwood_card: Dragonwood_Card) -> list[float]:
 
-        encoded_attack_option= [self.get_encoded_attack_option(attack_option[1])]
+        encoded_attack_option = [self.get_encoded_attack_option(attack_option[1])]
         encoded_card = self.get_encoded_card(dragonwood_card, attack_option[0])
         encoded_player_points = [x.points/50 for x in sorted(self.players, key=lambda obj: obj.name)]
         encoded_game_enders = [self.get_number_of_games_enders()/2]

@@ -14,7 +14,7 @@ import Dragonwood.SharedRandom as sr
 
 sr.set_seed()
 
-iterations = 10000
+iterations = 100000
 
 def run_genome(net):
     player_details = []
