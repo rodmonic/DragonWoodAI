@@ -323,8 +323,22 @@ When the process is running it can take hours to complete so I usually ran it in
 
 #### Success
 
-So after over 200 generations I ended Up with a network with a score of 16.6885. We now has a network that could compete with, and hopefully beat, my rule based algorithm.  
+So after over 300 generations I ended up with a network with a score of 16.6885. We now has a network that could compete with, and hopefully beat, my rule based algorithm. Two of the outputs from the process are a view of how the fitness value changed over the 300 generations.
 
+This below chart shows us how the network approaches it's best result with the max fitness in red staying pretty stable after 50 generations with the average and the $\pm$ 1 standard deviation and the average taking a little longer to reach optimum at around generation 200.
+
+|![Average Fitness by Generation](<./docs/Average Fitness by Generation.svg> "Average Fitness by Generation") |
+| :--: |
+| Average Fitness by Generation |
+
+The Speciation chart below shows which species of network are successful and are being mutated and reproduced under the network. Once a network is stagnant, i.e. has shown no improvement for 10 generations, it is removed from the process. We can see that as we get to later generations there is no one generation that is successfully improving enough to remain and the network has to rely on mutation to try and improve the fitness.
+
+
+|![Speciation](<./docs/Speciation by Generation.svg> "Speciation") |
+| :--: |
+| Speciation by Generation |
+
+Finally to check the networks performance against my rule based approach I run 10,000 games with Alice using the best network from the NEAT algorithm and the other players using the rule based appraoch with the best formula I derived based on our scenario analysis above [link](#Scenario-Analysis).
 
 
 #### References

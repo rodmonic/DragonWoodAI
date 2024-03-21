@@ -25,9 +25,9 @@ def run_genome(net):
         dice = Dice([1, 2, 2, 3, 3, 4])
         players = [
             Player(0, 0, "Alice", [], True),
-            Player(0, 0, "Bob", []),
-            Player(0, 0, "Charles", []),
-            Player(0, 0, "Dylan", [])
+            Player(0.38, -0.13, "Bob", []),
+            Player(0.38, -0.13, "Charles", []),
+            Player(0.38, -0.13, "Dylan", [])
         ]
 
         game = Game(
