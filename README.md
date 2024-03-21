@@ -305,17 +305,17 @@ At this point i had been working on getting the network right for a month and ha
 
 So I decided to simplify the encoding trying to put the least amount of information needed not worrying about abstracting away information. I ended up with the following encoding:
 
-* length of attacking hand
-* score to beat on selected Dragonwood card
-* number of points of selected Dragonwood card
-* scream modifier if the card is an enhancement
-* strike modifier if the card is an enhancement
-* stomp modifier if the card is an enhancement
-* player 1 score
-* player 2 score
-* player 3 score
-* player 4 score
-* game length context
+- length of attacking hand
+- score to beat on selected Dragonwood card
+- number of points of selected Dragonwood card
+- scream modifier if the card is an enhancement
+- strike modifier if the card is an enhancement
+- stomp modifier if the card is an enhancement
+- player 1 score
+- player 2 score
+- player 3 score
+- player 4 score
+- game length context
 
 This encoding reduces the number of input nodes from 86 to 11.
 
@@ -364,6 +364,16 @@ This may look confusing and messy at first glance but this is a result of how th
 |![Final Network Pruned](<./docs/Final Network Pruned.png> "Final Network Pruned") |
 | :--: |
 | Final Network Pruned |
+
+I have recoloured the input nodes that weren't affecting the output and formatted the lines between the nodes according to their weight. What we can clearly see now is that the most important nodes are the length of hand and score to beat as we would expect. The remaining nodes are of minimal importance.
+
+This broadly aligns with my initial intuition on how to select a card. It should be based on how many dice are available and the score that is needed to be beaten. It is interesting however that the amount of points or the reward from the enhancement are not important to the overall output.
+
+I think the slight advantage that Alice had over the rule based agents was probably down to the network calculating a slightly better formula for prioritising when to attack.
+
+#### Results and next steps
+
+
 
 #### References
 
