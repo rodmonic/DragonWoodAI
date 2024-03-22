@@ -84,7 +84,7 @@ After the model was created I needed to develop a rule based approach to selecti
 
 As part of deciding on the best algorithm I performed some analysis on what is the most successful formula for a rule based algorithm. This boils down to the best values of $a$ and $b$ in the below formula:
 
-$$($c$ \times (Ev_{dice}+$a$)+$b$)- {card\ defence\ score}$$
+$$(c \times (Ev_{dice}+a)+b)- {card\ defence\ score}$$
 
 Where:
 
@@ -94,7 +94,7 @@ Where:
 
 To find the best values for $a$ and $b$ I kept 3 players' $a$ and $b$ values constant at 0 and then searched through candidate values running a thousand games for each combination and seeing which  gave the best points per turn. After running 10,000 games  the optimum formula was:
 
-$$($c& \times (2.50+0.38)-0.13) - {card\ defence\ score}$$
+$$(c \times (2.50+0.38)-0.13) - {card\ defence\ score}$$
 
 | ![Sensitivity Analysis](https://github.com/rodmonic/DragonWoodAI/blob/cb04a135d0b5841cf91336857bccf0b6db3221c4/docs/sentivity%20analysis.png "Sensitivity Analysis") |
 | :--: |
@@ -201,11 +201,11 @@ Now we have a technique selected and before we go into the important step of inp
 1. A game is then played between Alice and the 3 other players.
 1. Each time Alice attacks, the environment provides a list of all possible combinations of attacking cards and Dragonwood cards to attack.
 1. Each attack combination is then encoded and inputted into the network.
-1. If any combination score from the network is over a certain limit, in our case 0.33, the attack combination with the highest score from the network is selected, otherwise draw a card.
+1. If any combination's score from the network is over a certain limit, in our case 0.33, the attack combination with the highest score from the network is selected, otherwise a card is drawn.
 1. The decision is then enacted by the environment.
 1. This is repeated until the game ends.
 1. The reward is calculated for that network and game.
-1. To make sure the networks are given a chance to understand the implications of their weightings and architecture 2000 games are run and Alice's average score passed to the NEAT algorithm.
+1. To make sure the networks are given a chance to understand the implications of their weightings and architecture, 2000 games are run and Alice's average fitness is passed to the NEAT algorithm.
 1. The NEAT algorithm then varies the networks based on the reward gained.
 
 This process is repeated until a certain number of iterations is passed or the reward function exceeds a user specified limit.
@@ -216,9 +216,9 @@ This process is repeated until a certain number of iterations is passed or the r
 
 #### Reward Function
 
-The reward function should be derived to make sure that the correct behaviour is being encouraged through the learning process. The reward function outputs a float number with higher being better. Initially, given our stretch goal of trying to make the AI learn rules instead of imposing rules on it, the AI was provided with a full list of possible attack options including ones that were statistically not possible to attain. I.e. the score of the card was higher than the highest possible dice roll for that option.
+The reward function should be derived to make sure that the correct behaviour is being encouraged throughout the learning process. The reward function outputs a float number with higher being better. Initially, given the stretch goal of trying to make the AI learn rules instead of imposing rules on it, the AI was provided with a full list of possible attack options including ones that were statistically not possible to attain. I.e. the defence score of the card was higher than the highest possible dice roll for that option.
 
-The first iteration of our Reward function was simple it would be the average score received by that network:
+The first iteration of the reward function was simple, it would be the average score received by that network:
 
 $$\frac{\sum {score}}{number\ of\ iterations}$$
 
@@ -246,7 +246,7 @@ This step was actually what took the longest time and included much searching of
   - 1.0 of the card is available and selected for attack
   - 0.0 otherwise
 
-- All players current points - encoded as a vector of length 4 with each element represented as the players score / 50 to get it within the range \[0,1\]
+- All players' current points - encoded as a vector of length 4 with each element represented as the $\frac{player\ score}{50}$ to get it within the range \[0,1\]
 
 - Context on how far into the game you are - encoded as a vector of length 2.
 
@@ -254,14 +254,13 @@ This resulted in a input layer with 86 neurons.
 
 #### Experiments
 
-
-Our aim with all of these networks is to beat the rule based approach so to give me a number to aim for I ran the algorithm but only used the rule based approach, this gave me an average score of around 14 per game. For all of our experiments we need for the AI to be able to get more than this to say we have been successful.
+The aim with all of these networks is to beat the rule based approach. To give me a number to aim for I ran the algorithm but only used the rule based approach, this gave me an average score of around 14 per game. For all of our experiments we need for the AI to be able to get more than this to say we have been successful.
 
 #### Experiment 1
 
 My initial runs weren't very successful and resulted in an average fitness of around 2-3 with a best fitness of 4, nowhere near our target of 14. After analysis of the code and reviewing the actions the network was taking I found the following problems
 
-- The network was selecting options where it was weren't mathematically possible to win. i.e. the total card score was greater than any possible dice score. Interestingly this is what my children used to do.
+- The network was selecting options where it was wasn't mathematically possible to win. i.e. the total card score was greater than any possible dice score. Interestingly this is what my children used to do.
 
 - The encoding had some bugs in that meant it wasn't presenting a consistent state.
 
@@ -269,14 +268,13 @@ My initial runs weren't very successful and resulted in an average fitness of ar
 
 - There was an error in the encoding when there was was 2 of the same Dragonwood cards available to attack.
 
-To try and stop the network from selecting options that weren't valid I changed the reward function to be the average score per game -0.5 times the number of invalid choices:
+To try and stop the network from selecting options that weren't valid I changed the reward function to be the average score per game -0.5 $\times$ the number of invalid choices:
 
 $$\frac{\sum{({score}+{number\ of\ invalid\ choices} \times -0.5)}}{number\ of\ iterations}$$
 
-
 #### Experiment 2
 
-After updating the encoding and reward function I was able to be a bit more successful. The network was now quickly learning not to play impossible card combinations and was eventually able to have an average score of 3 and with a best network value of 7. This is still not near the levels needed.
+After updating the encoding and reward function I was able to be a bit more successful. The network was now quickly learning not to play impossible card combinations and was eventually able to have an average score of 3 and with a best network value of 7. Not a huge improvement unfortunately.
 
 After review of the actions selected by the network it seemed to be drawing cards more often than needed and would only attack high value cards when it had a good chance of winning. This conservatism meant that cards with smaller attack values and points were being ignored completely. The cards were even being ignored when the network had valid attacks that had a very good chance of winning. It seems that the new reward function was causing the network to learn to be very cautious and the points it won for the smaller cards was not enough for it to prioritise those cards.
 
@@ -289,21 +287,21 @@ These changes resulted in a slight increase in the average score to 7 but still 
 
 #### Experiment 3
 
-It seems that the network was still being conservative and was drawing cards when it shouldn't be. A measure of success of playing in Dragonwood is the amount of value you get per card. The more cards you discard the less chance to get points you have. As a final attempt to get a less conservative player I changed the function to try and incorporate this. 
+It seems that the network was still being conservative and was drawing cards when it shouldn't be. A measure of success of playing in Dragonwood is the amount of points you get per card. The more cards you discard the less chance to get points you have. As a final attempt to get a less conservative AI agent I changed the function to try and incorporate this.
 
 Unfortunately this had the opposite effect and after a few generations the network was only drawing cards and doing nothing else.
 
- #### Experiment 4
+#### Experiment 4
 
  I was starting to think that the state encoding was too complicated to allow the network to learn from. Before going back to the drawing board I decided to only provide attack options to the network that were possible. This does go against our stretch goal of trying to let the network learn the game rules but at this point I felt it was a good compromise to make.
 
- Once this had been implemented the network did converge on an answer much quicker and we saw a slight increase in the best performing network. However the best score of 8 was still pretty far from the value needed.
+ Once this had been implemented the network did converge on an answer much quicker and I saw a slight increase in the best performing network. However the best score of 8 was still pretty far from the value needed.
 
 #### Experiment 5
 
 At this point i had been working on getting the network right for a month and had changed quite a few variables with minimal change in the resultant reward function. I felt therefore it was time to review the input encoding. Simplification of the encoding would mean that more of the games logic would be abstracted away from the network but the current approach was not yielding results.
 
-So I decided to simplify the encoding trying to put the least amount of information needed not worrying about abstracting away information. I ended up with the following encoding:
+So I decided to simplify the encoding trying to put the least amount of information needed, not worrying about abstracting away information. I ended up with the following encoding:
 
 - length of attacking hand
 - score to beat on selected Dragonwood card
@@ -323,7 +321,7 @@ When the process is running it can take hours to complete so I usually ran it in
 
 #### Success
 
-So after over 300 generations I ended up with a network with a score of 16.6885. We now has a network that could compete with, and hopefully beat, my rule based algorithm. Two of the outputs from the process are a view of how the fitness value changed over the 300 generations.
+So after over 300 generations I ended up with a network with a score of 16.6885. We now has a network that could compete with, and hopefully beat, my rule based algorithm. 
 
 This below chart shows us how the network approaches it's best result with the max fitness in red staying pretty stable after 50 generations with the average and the $\pm$ 1 standard deviation and the average taking a little longer to reach optimum at around generation 200.
 
@@ -331,8 +329,7 @@ This below chart shows us how the network approaches it's best result with the m
 | :--: |
 | Average Fitness by Generation |
 
-The Speciation chart below shows which species of network are successful and are being mutated and reproduced under the network. Once a network is stagnant, i.e. has shown no improvement for 10 generations, it is removed from the process. We can see that as we get to later generations there is no one generation that is successfully improving enough to remain and the network has to rely on mutation to try and improve the fitness.
-
+The Speciation chart below shows which species are successful and are being mutated and reproduced under the network. Once a network is stagnant, i.e. has shown no improvement for 10 generations, it is removed from the process. We can see that as we get to later generations there is no one generation that is successfully improving enough to remain and the network has to rely on mutation to try and improve the fitness.
 
 |![Speciation](<./docs/Speciation by Generation.svg> "Speciation") |
 | :--: |
@@ -344,9 +341,9 @@ Finally to check the networks performance against my rule based approach I run 1
 | :--: |
 | Final Results |
 
-While the results aren't massive, they do show a 6% increase in chance of winning over the determinsitic algorithm. We can see that Alice has managed to not only learn the right moves to make she has a slight advantage over the rule based algorithm.
+While the advantage Alice has isn't massive, there is a 6% increase in chance of winning over the deterministic algorithm. We can see that Alice has managed to not only learn the right moves to make she has a slight advantage over the rule based algorithm.
 
-To try and understand why this might be and some of the decision making process behind the algorithm I decided to investigate the weights and structure of the network. The Neat-python library has a simple tool that visualises the winning network. The first output of the tool provides us with the below network.
+To try and understand why this might be and some of the decision making process behind the algorithm, I decided to investigate the weights and structure of the network. The Neat-python library has a simple tool that visualises the winning network. The first output of the tool provides us with the below network.
 
 |![Final Network Full](<./docs/Final Network Full.png> "Final Network") |
 | :--: |
@@ -373,6 +370,8 @@ I think the slight advantage that Alice had over the rule based agents was proba
 
 #### Results and next steps
 
+Before we get to the results I think the huge changes gained by the encoding change in Experiment 5 warrant a little bit of discussion. This really proves how important the input encoding is and how it must include only information that is relevant to it. In my first attempt at an encoding I was providing the information
+
 If I refer back to my initial goals for the project they were:
 
 1. Create a model to allow me to play Dragonwood programmatically in Python
@@ -380,7 +379,7 @@ If I refer back to my initial goals for the project they were:
 1. Develop an AI that can play Dragonwood using reinforcement learning that is as good, or better than the rule based algorithm.
 1. Learn some strategies from the AI to improve my chances against my kids.
 
-I would say I have achieved the first 3 goals and while I didn't get any specific strategies to use from the AI, it did effectively confirm that the rule based approach gives a very good strategy to use against my kids and the AI generated newtork provides a 7% improvement over the rule based algorithm I generated.
+I would say I have achieved the first 3 goals and while I didn't get any specific strategies to use from the AI, it did effectively confirm that the rule based approach gives a very good strategy to use against my kids and the AI generated network provides a 7% improvement over the rule based algorithm I generated.
 
 There are a number of simplifying assumptions I've made and some limitations to my approach that do have an impact on strategy. To develop this further and to make a more relevant AI I could change the following:
 
