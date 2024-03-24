@@ -4,7 +4,7 @@
 
 I, like most parents, enjoy playing board games with my kids and one they particularly enjoy is Dragonwood. I have played it a lot with my kids and started to wonder what the best strategy was and how I can increase my chances of winning. It seems that my kids have an innate understanding of the probabilities involved and have started to beat me more and more.
 
-I searched online for any strategies or explanation of the probabilities involved but couldn't find anything so decided I would approach the problem like I would any problem I usually encounter at work. I had been aware of the AI technique of Reinforcement Learning for a while but had never had a suitable problem to apply it to.
+I searched online for any strategies or an explanation of the probabilities involved but couldn't find anything so decided I would approach the problem like I would any problem I usually encounter at work. I had also been aware of the AI technique of Reinforcement Learning for a while but had never had a suitable problem to apply it to.
 
 So as an excuse to get better at Dragonwood, learn an new AI technique and to write some python I decided to see if I could teach an AI to play the game better than me and try and understand what strategies it uses.
 
