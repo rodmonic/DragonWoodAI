@@ -2,7 +2,7 @@
 
 ## Introduction
 
-I, like most parents, enjoy playing board games with my kids and one they particularly enjoy is Dragonwood. I have play it a lot with my kids and started to wonder what the best strategy was and how I can increase my chances of winning. It seems that my kids have an innate understanding of the probabilities involved and have started to beat me more and more.
+I, like most parents, enjoy playing board games with my kids and one they particularly enjoy is Dragonwood. I have played it a lot with my kids and started to wonder what the best strategy was and how I can increase my chances of winning. It seems that my kids have an innate understanding of the probabilities involved and have started to beat me more and more.
 
 I searched online for any strategies or explanation of the probabilities involved but couldn't find anything so decided I would approach the problem like I would any problem I usually encounter at work. I had been aware of the AI technique of Reinforcement Learning for a while but had never had a suitable problem to apply it to.
 
