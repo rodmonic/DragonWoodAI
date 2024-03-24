@@ -321,7 +321,7 @@ When the process is running it can take hours to complete so I usually ran it in
 
 #### Success
 
-So after over 300 generations I ended up with a network with a score of 16.6885. We now has a network that could compete with, and hopefully beat, my rule based algorithm. 
+So after over 300 generations I ended up with a network with a score of 16.6885. I now have a network that could compete with, and hopefully beat, my rule based algorithm. 
 
 This below chart shows us how the network approaches it's best result with the max fitness in red staying pretty stable after 50 generations with the average and the $\pm$ 1 standard deviation and the average taking a little longer to reach optimum at around generation 200.
 
