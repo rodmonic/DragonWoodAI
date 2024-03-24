@@ -370,9 +370,11 @@ I think the slight advantage that Alice had over the rule based agents was proba
 
 #### Results and next steps
 
-Before we get to the results I think the huge changes gained by the encoding change in Experiment 5 warrant a little bit of discussion. This really proves how important the input encoding is and how it must include only information that is relevant to it. In my first attempt at an encoding I was providing the network with a lot of information, some of which wasn't useful to learn from. For example, I was providing the cards in the player's hand as well as the card in the attack option. We now know the important information was actually the number of cards attacking and the score to beat, the network was not able to deduce this information from the encoding and sp was strggling to learn. There was also a lot of other information which was confusing the net
+Before we get to the results I think the huge changes gained by the encoding change in Experiment 5 warrant a little bit of discussion. This really proves how important the input encoding is and how it must include only information that is relevant to it. In my first attempt at an encoding I was providing the network with a lot of information, some of which wasn't useful to learn from. For example, I was providing the cards in the player's hand as well as the card in the attack option. We now know the important information was actually the number of cards attacking and the score to beat, the network was not able to deduce this information from the encoding and sp was strggling to learn. There was also a lot of other information which was confusing the network that was laregly urelated to selecting a card.
 
-If I refer back to my initial goals for the project they were:
+One point to note on the above is that our encoding must be tailored to our outputs. If we are just asking the network to decide on the hand to select we only need to include relevant information. If however, we wanted to extend the network to also include a decision on discarding cards and playing temporary enhancements then we would need to extend our encoding to include the relevant information to answer all these queries.
+
+Given the above have I been successful? Well, if I refer back to my initial goals for the project they were:
 
 1. Create a model to allow me to play Dragonwood programmatically in Python
 1. Develop an rule based algorithm to play Dragonwood deterministically and model how a player selects which cards to attack and when.
