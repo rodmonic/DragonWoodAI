@@ -341,7 +341,7 @@ Finally to check the networks performance against my rule based approach I run 1
 | :--: |
 | Final Results |
 
-While the advantage Alice has isn't massive, there is a 6% increase in chance of winning over the deterministic algorithm. We can see that Alice has managed to not only learn the right moves to make she has a slight advantage over the rule based algorithm.
+While the advantage Alice has isn't massive, there is a 7% increase in chance of winning over the deterministic algorithm. We can see that Alice has managed to not only learn the right moves to make she has a slight advantage over the rule based algorithm.
 
 To try and understand why this might be and some of the decision making process behind the algorithm, I decided to investigate the weights and structure of the network. The Neat-python library has a simple tool that visualises the winning network. The first output of the tool provides us with the below network.
 
@@ -370,7 +370,7 @@ I think the slight advantage that Alice had over the rule based agents was proba
 
 #### Results and next steps
 
-Before we get to the results I think the huge changes gained by the encoding change in Experiment 5 warrant a little bit of discussion. This really proves how important the input encoding is and how it must include only information that is relevant to it. In my first attempt at an encoding I was providing the information
+Before we get to the results I think the huge changes gained by the encoding change in Experiment 5 warrant a little bit of discussion. This really proves how important the input encoding is and how it must include only information that is relevant to it. In my first attempt at an encoding I was providing the network with a lot of information, some of which wasn't useful to learn from. For example, I was providing the cards in the player's hand as well as the card in the attack option. We now know the important information was actually the number of cards attacking and the score to beat, the network was not able to deduce this information from the encoding and sp was strggling to learn. There was also a lot of other information which was confusing the net
 
 If I refer back to my initial goals for the project they were:
 
