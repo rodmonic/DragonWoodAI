@@ -383,7 +383,7 @@ Given the above have I been successful? Well, if I refer back to my initial goal
 
 I would say I have achieved the first 3 goals and while I didn't get any specific strategies to use from the AI, it did effectively confirm that the rule based approach gives a very good strategy to use against my kids and the AI generated network provides a 7% improvement over the rule based algorithm I generated.
 
-#### Next Steps
+#### Next Steps and wider applicability
 
 There are a number of simplifying assumptions I've made and some limitations to my approach that do have an impact on strategy. To develop this further and to make a more relevant AI I could change the following:
 
@@ -393,21 +393,21 @@ There are a number of simplifying assumptions I've made and some limitations to 
 
 - There are certain game mechanics I have ignored as they have the same effect on all players which could be added in to make the game reflect the real game as much as possible.
 
+This process and associated techniques are applicable in multiple disparate domains, not just in games but any system where an agent takes action on a system and where a reward function can be derived. RL is particularly useful in optimisation problems and in finding or testing complex strategies and their impact.
+
+For example if a digital twin exists of a system and maintenance actions and their impact and cost could be quantified then these processes could be used to minimise the maintenance cost of a system or to maximise availability.
+
 #### Final summary
 
-Overall it has been a really interesting and rewarding process and I have learnt a lot about Reinforcement Learning, Neural Networks and how to model systems in using Object Oriented programming in Python. However, by the time I have got to a point where I could apply the strategies i had leant my kids had moved on and dont want to play Dragonwood anymore. 
+Overall it has been a really interesting and rewarding process and I have learnt a lot about Reinforcement Learning, Neural Networks and how to model systems in using Object Oriented programming in Python. However, by the time I have got to a point where I could apply the strategies  I had leant my kids had moved on and dont want to play Dragonwood anymore. 
 
-The three lessons i have learnt from the process are:
+The three lessons I have learnt from the process are:
 
 - Be very careful when generating the input encoding.
 
 - Sometimes a rule based approach will give good enough results.
 
 - Be quicker as children get bored easily.
-
-
-
-This process and associated techniques are applicable in multiple disparate domains, not just in games but any system where an agent takes action on a system and where a reqard function can be derived. For example if a digital twin exists of a system and maintenance actions and their impact and cost could be quantified then these processes could be used to minimise the maintenance cost of a system or to maximise availability. 
 
 #### References
 
