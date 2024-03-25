@@ -323,27 +323,27 @@ When the process is running it can take hours to complete so I usually ran it in
 
 So after over 300 generations I ended up with a network with a score of 16.6885. I now have a network that could compete with, and hopefully beat, my rule based algorithm. 
 
-This below chart shows us how the network approaches it's best result with the max fitness in red staying pretty stable after 50 generations with the average and the $\pm$ 1 standard deviation and the average taking a little longer to reach optimum at around generation 200.
+This below chart shows us how the network approaches it's best result with the max fitness in red staying pretty stable after 50 generations with the average and the $\pm$ 1 standard deviation taking a little longer to reach optimum at around generation 200.
 
 |![Average Fitness by Generation](<./docs/Average Fitness by Generation.svg> "Average Fitness by Generation") |
 | :--: |
 | Average Fitness by Generation |
 
-The Speciation chart below shows which species are successful and are being mutated and reproduced under the network. Once a network is stagnant, i.e. has shown no improvement for 10 generations, it is removed from the process. We can see that as we get to later generations there is no one generation that is successfully improving enough to remain and the network has to rely on mutation to try and improve the fitness.
+The Speciation chart below shows which species are successful and are being mutated and reproduced under the network. Once a network is stagnant, i.e. has shown no improvement for 10 generations, it is removed from the process. We can see that as we get to later generations there is no one generation that is successfully improving enough to remain and the network has to rely on mutation and eventual removal due to stagnantion to try and improve the fitness.
 
 |![Speciation](<./docs/Speciation by Generation.svg> "Speciation") |
 | :--: |
 | Speciation by Generation |
 
-Finally to check the networks performance against my rule based approach I run 100,000 games with Alice using the best network from the NEAT algorithm and the other players using the rule based approach with the best formula I derived based on our scenario analysis above.
+Finally to check the networks performance against my rule based approach I ran 100,000 games with Alice using the best network from the NEAT algorithm and the other players using the rule based approach with the best formula I derived based on our scenario analysis above.
 
 |![Final Results](<./docs/Final Winners.png> "Final Results") |
 | :--: |
 | Final Results |
 
-While the advantage Alice has isn't massive, there is a 7% increase in chance of winning over the deterministic algorithm. We can see that Alice has managed to not only learn the right moves to make she has a slight advantage over the rule based algorithm.
+While the advantage Alice has isn't massive, there is a 7% increase in chance of winning over the deterministic algorithm. We can see that Alice has managed to not only learn the right moves to make but she also has a slight advantage over the rule based algorithm.
 
-To try and understand why this might be and some of the decision making process behind the algorithm, I decided to investigate the weights and structure of the network. The Neat-python library has a simple tool that visualises the winning network. The first output of the tool provides us with the below network.
+To try and understand why this might be, and some of the decision making process behind the algorithm, I decided to investigate the weights and structure of the network. The Neat-python library has a simple tool that visualises the winning network. The first output of the tool provides us with the below network.
 
 |![Final Network Full](<./docs/Final Network Full.png> "Final Network") |
 | :--: |
@@ -354,23 +354,23 @@ Within the network we have the following elements:
 - Grey nodes are the input nodes
 - The blue node is the output node
 - Yellow nodes are hidden nodes connected to the input or output nodes.
-- Red nodes are hidden nodes unconnected to our data.
+- Red nodes are hidden nodes unconnected to the inout or putput nodes.
 
-This may look confusing and messy at first glance but this is a result of how the network is evolved. Nodes and connections are added and deleted to network by the NEAT algorithm at random. This means nodes may become disconnected from the input nodes or output nodes but are not deleted. So they have no impact on our output but are still included. Therefore any node that is not connected to the input or output node can be deleted. a "pruned" version is shown below.
+This may look confusing and messy at first glance but this is a result of how the network is evolved. Nodes and connections are added and deleted to the network by the NEAT algorithm at random. This means nodes may become disconnected from the input nodes or output nodes but are not deleted automatically but have no impact on our output. Therefore, any node that is not connected to the input or output node can be deleted. A "pruned" version is shown below.
 
 |![Final Network Pruned](<./docs/Final Network Pruned.png> "Final Network Pruned") |
 | :--: |
 | Final Network Pruned |
 
-I have recoloured the input nodes yellow that weren't affecting the output and formatted the lines between the nodes according to their weight. What we can clearly see now is that the most important nodes are the length of hand and score to beat as we would expect. The remaining nodes are of minimal importance.
+I have recoloured the input nodes yellow that weren't affecting the output and formatted the lines between the nodes according to their weight. What we can clearly see now is that the most important input nodes are the length of attacking hand and score to beat as we would expect. The remaining nodes are of minimal importance.
 
-This broadly aligns with my initial intuition on how to select a card. It should be based on how many dice are available and the score that is needed to be beaten. It is interesting however that the amount of points or the reward from the enhancement are not important to the overall output.
+This broadly aligns with my initial intuition on how to select a card. It should be based on how many dice are available and the score needing to be beaten. It is interesting however that the amount of points or the reward from the enhancement are not important to the overall output.
 
 I think the slight advantage that Alice had over the rule based agents was probably down to the network calculating a slightly better formula for prioritising when to attack.
 
-#### Results and next steps
+#### Results
 
-Before we get to the results I think the huge changes gained by the encoding change in Experiment 5 warrant a little bit of discussion. This really proves how important the input encoding is and how it must include only information that is relevant to it. In my first attempt at an encoding I was providing the network with a lot of information, some of which wasn't useful to learn from. For example, I was providing the cards in the player's hand as well as the card in the attack option. We now know the important information was actually the number of cards attacking and the score to beat, the network was not able to deduce this information from the encoding and sp was strggling to learn. There was also a lot of other information which was confusing the network that was laregly urelated to selecting a card.
+Before we get to the results in detail, I think the huge changes gained by the encoding change in Experiment 5 warrant a little bit of discussion. This really proves how important the input encoding is and how it must include only relevant information. In my first attempt at an encoding I was providing the network with a lot of information, some of which wasn't useful to learn from. For example, I was providing the cards in the player's hand as well as the card in the attack option. We now know the important information was actually the number of cards attacking and the score to beat. This meant the network was not able to deduce this information from the encoding and so was strggling to learn. There was also a lot of other information which was confusing the network that was laregly unrelated to selecting a card.
 
 One point to note on the above is that our encoding must be tailored to our outputs. If we are just asking the network to decide on the hand to select we only need to include relevant information. If however, we wanted to extend the network to also include a decision on discarding cards and playing temporary enhancements then we would need to extend our encoding to include the relevant information to answer all these queries.
 
@@ -383,6 +383,8 @@ Given the above have I been successful? Well, if I refer back to my initial goal
 
 I would say I have achieved the first 3 goals and while I didn't get any specific strategies to use from the AI, it did effectively confirm that the rule based approach gives a very good strategy to use against my kids and the AI generated network provides a 7% improvement over the rule based algorithm I generated.
 
+#### Next Steps
+
 There are a number of simplifying assumptions I've made and some limitations to my approach that do have an impact on strategy. To develop this further and to make a more relevant AI I could change the following:
 
 - Model more of the enhancement cards including temporary cards that require their own decision about whether to play them.
@@ -391,7 +393,19 @@ There are a number of simplifying assumptions I've made and some limitations to 
 
 - There are certain game mechanics I have ignored as they have the same effect on all players which could be added in to make the game reflect the real game as much as possible.
 
-Overall it has been a really interesting and rewarding process and I have learnt a lot about Reinforcement Learning, Neural Networks and how to model systems in using Object Oriented programming in Python. 
+#### Final summary
+
+Overall it has been a really interesting and rewarding process and I have learnt a lot about Reinforcement Learning, Neural Networks and how to model systems in using Object Oriented programming in Python. However, by the time I have got to a point where I could apply the strategies i had leant my kids had moved on and dont want to play Dragonwood anymore. 
+
+The three lessons i have learnt from the process are:
+
+- Be very careful when generating the input encoding.
+
+- Sometimes a rule based approach will give good enough results.
+
+- Be quicker as children get bored easily.
+
+
 
 This process and associated techniques are applicable in multiple disparate domains, not just in games but any system where an agent takes action on a system and where a reqard function can be derived. For example if a digital twin exists of a system and maintenance actions and their impact and cost could be quantified then these processes could be used to minimise the maintenance cost of a system or to maximise availability. 
 
