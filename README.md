@@ -90,7 +90,7 @@ Where:
 
 - $c$ is the number of attacking cards
 - $Ev_{dice}$ is expected value of the dice.
-- $ card\ defence\ score $ is the Dragonwood card's score to beat for that attack type.
+- $card\ defence\ score$ is the Dragonwood card's score to beat for that attack type.
 
 To find the best values for $a$ and $b$ I kept 3 players' $a$ and $b$ values constant at 0 and then searched through candidate values running a thousand games for each combination and seeing which  gave the best points per turn. After running 10,000 games  the optimum formula was:
 
