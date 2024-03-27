@@ -14,6 +14,10 @@ The game itself is quite simple and easy to learn but there are a number of deci
 
 >*Play cards to earn dice, which you will roll to defeat a fierce array of creatures, or capture magical items that may help you along the way. Whoever earns the most victory points wins.*
 
+The below video sums up the rules pretty well and shows the basic structure of the game.
+
+[![](https://img.youtube.com/vi/OL9VgIW8pV8/0.jpg)](https://www.youtube.com/watch?v=OL9VgIW8pV8)
+
 The players play Adventurer cards from their hand of up to 9 to capture one of 5 available Dragonwood cards. The adventurer cards are numbered 1-12 and are of 5 different colours. A player can make the following 4 decisions:
 
 - Strike - attack with cards that are in order regardless of colour.
