@@ -6,7 +6,7 @@ I, like most parents, enjoy playing board games with my kids and one they partic
 
 I searched online for any strategies or an explanation of the probabilities involved but couldn't find anything so decided I would approach the problem like I would any problem I usually encounter at work. I had also been aware of the AI technique of Reinforcement Learning for a while but had never had a suitable problem to apply it to.
 
-So as an excuse to get better at Dragonwood, learn an new AI technique and to write some python I decided to see if I could teach an AI to play the game better than me and try and understand what strategies it uses.
+So as an excuse to get better at Dragonwood, learn a new AI technique and to write some python I decided to see if I could teach an AI to play the game better than me and try and understand what strategies it uses.
 
 ## The Game
 
