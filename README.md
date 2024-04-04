@@ -104,7 +104,7 @@ $$(c \times (2.50+0.38)-0.13) - {card\ defence\ score}$$
 
 #### Introduction to reinforcement learning
 
-Reinforcement Learning is a paradigm within machine learning where an AI controlled agent learns optimal behaviour within an environment by exploring actions and seeing their impact on a reward function. The main advantage of reinforcement learning is that we do not need a labelled data set on which to train our model, it also works well within games as we have an easily identifiable agent in the form of players.
+Reinforcement Learning is a paradigm within machine learning where an AI controlled agent learns optimal behaviour within an environment by exploring actions and seeing their impact on a reward function. The main advantage of reinforcement learning is that it relies much less on humans needing an in-depth understanding of the system involved to program rules explicitly when compared to traditional processes. This advantage is especially potent as systems become more complex, as finding humans with the necessary knowledge can become increasingly difficult (if not impossible).  
 
 The diagram and definition below shows how the various elements within a Reinforcement Learning problem interact. 
 
@@ -364,7 +364,7 @@ This may look confusing and messy at first glance but this is a result of how th
 
 I have recoloured the input nodes yellow that weren't affecting the output and formatted the lines between the nodes according to their weight. What we can clearly see now is that the most important nodes are the length of hand and score to beat as we would expect. The remaining nodes are of minimal importance.
 
-This broadly aligns with my initial intuition on how to select a card. It should be based on how many dice are available and the score that is needed to be beaten. It is interesting however that the amount of points or the reward from the enhancement are not important to the overall output.
+This broadly aligns with my initial intuition on how to select a card. It should be based on how many dice are available and the score that is needed to be beaten. It is interesting however that the amount of points or the reward from the enhancement are not important to the overall output. One possible explanation for this is that the game developers did a good job of balancing the score to beat with the reward points,  meaning the score to beat alone is enough to capture any cost-benefit trade-offs when deciding on whether to attack.
 
 I think the slight advantage that Alice had over the rule based agents was probably down to the network calculating a slightly better formula for prioritising when to attack.
 
