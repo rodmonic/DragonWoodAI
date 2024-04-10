@@ -104,9 +104,7 @@ $$(c \times (2.50+0.38)-0.13) - {card\ defence\ score}$$
 | :--: |
 | Search matrix for values of $a$ and $b$ |
 
-### Goal 3 - Dragonwood AI
-
-## Introduction to reinforcement learning
+### Goal 3 - Dragonwood AI - Introduction to reinforcement learning
 
 Reinforcement Learning is a paradigm within machine learning where an AI controlled agent learns optimal behaviour within an environment by exploring actions and seeing their impact on a reward function. The main advantage of reinforcement learning is that it relies much less on humans needing an in-depth understanding of the system involved to program rules explicitly when compared to traditional processes. This advantage is especially potent as systems become more complex, as finding humans with the necessary knowledge can become increasingly difficult (if not impossible).  
 
@@ -132,7 +130,7 @@ There are multiple different techniques within reinforcement learning, for this 
 
 - [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture against a reward function.
 
-### Q-Learning
+#### Q-Learning
 
 Q-learning is a branch of Reinforcement learning where the agent learns by iterating over the possible actions multiple times to learn which actions lead to the best outcomes. It does this through the generation and iterative update of what's known as the Q-Learning Table.
 
@@ -146,7 +144,7 @@ The Q-value is calculated iteratively and updated as the agent takes actions and
 
 The Q-value is updated according to a complex formula that includes a learning rate to allow for exploration of new possibilities as well as learning as from previous experience.
 
-### State and action space
+#### State and action space
 
 The first step to implement Q-Learning would be to define the action space and state space to allow me to define the Q-table. This is the total possible states and subsequent actions. As stated in the stretch goal for this task I wanted to try and not abstract away the game rules where possible. This means I want to just and provide the AI Agent with the game and action state and to allow it to learn it's behaviour based on the reward function.
 
@@ -170,7 +168,7 @@ Given this definition the action-state space does become quite large.
 
 A very large action-state space means that the model will need to be run longer to make sure all possible combinations are investigated multiple times. One way to reduce the action-state space would be to simplify how the state is represented or to use Deep Q-Learning which uses a neural network to represent the Q-table. However, I felt that there might be other algorithms and techniques out there that would allow me to train the AI without simplification. this leads us to my second technique.
 
-### Introduction to NEAT
+#### Introduction to NEAT
 
 NeuroEvolution of Augmenting Topologies (NEAT) is an algorithm developed in 2002 to generate and vary neural networks in a way based on genetic principals. The algorithm varies both the weights, biases and structure of the neural network by mutating and reproducing neural networks to find the best structure to maximise the reward function.
 
@@ -323,7 +321,7 @@ This encoding reduces the number of input nodes from 86 to 11.
 
 When the process is running it can take hours to complete so I usually ran it in the evening or over the weekend. So I started it running on a Friday evening and went to bed.
 
-### Success
+## Success
 
 So after over 300 generations I ended up with a network with a score of 16.6885. I now have a network that could compete with, and hopefully beat, my rule based algorithm. 
 
