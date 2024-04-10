@@ -106,7 +106,7 @@ $$(c \times (2.50+0.38)-0.13) - {card\ defence\ score}$$
 
 ### Goal 3 - Dragonwood AI
 
-#### Introduction to reinforcement learning
+## Introduction to reinforcement learning
 
 Reinforcement Learning is a paradigm within machine learning where an AI controlled agent learns optimal behaviour within an environment by exploring actions and seeing their impact on a reward function. The main advantage of reinforcement learning is that it relies much less on humans needing an in-depth understanding of the system involved to program rules explicitly when compared to traditional processes. This advantage is especially potent as systems become more complex, as finding humans with the necessary knowledge can become increasingly difficult (if not impossible).  
 
@@ -132,7 +132,7 @@ There are multiple different techniques within reinforcement learning, for this 
 
 - [Neuroevolution of augmenting topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies). A genetic algorithm where a neural network is varied over time to find the best performing architecture against a reward function.
 
-#### Q-Learning
+### Q-Learning
 
 Q-learning is a branch of Reinforcement learning where the agent learns by iterating over the possible actions multiple times to learn which actions lead to the best outcomes. It does this through the generation and iterative update of what's known as the Q-Learning Table.
 
@@ -146,7 +146,7 @@ The Q-value is calculated iteratively and updated as the agent takes actions and
 
 The Q-value is updated according to a complex formula that includes a learning rate to allow for exploration of new possibilities as well as learning as from previous experience.
 
-#### State and action space
+### State and action space
 
 The first step to implement Q-Learning would be to define the action space and state space to allow me to define the Q-table. This is the total possible states and subsequent actions. As stated in the stretch goal for this task I wanted to try and not abstract away the game rules where possible. This means I want to just and provide the AI Agent with the game and action state and to allow it to learn it's behaviour based on the reward function.
 
@@ -170,7 +170,7 @@ Given this definition the action-state space does become quite large.
 
 A very large action-state space means that the model will need to be run longer to make sure all possible combinations are investigated multiple times. One way to reduce the action-state space would be to simplify how the state is represented or to use Deep Q-Learning which uses a neural network to represent the Q-table. However, I felt that there might be other algorithms and techniques out there that would allow me to train the AI without simplification. this leads us to my second technique.
 
-#### Introduction to NEAT
+### Introduction to NEAT
 
 NeuroEvolution of Augmenting Topologies (NEAT) is an algorithm developed in 2002 to generate and vary neural networks in a way based on genetic principals. The algorithm varies both the weights, biases and structure of the neural network by mutating and reproducing neural networks to find the best structure to maximise the reward function.
 
@@ -256,11 +256,11 @@ This step was actually what took the longest time and included much searching of
 
 This resulted in a input layer with 86 neurons.
 
-#### Experiments
+## Experiments
 
 The aim with all of these networks is to beat the rule based approach. To give me a number to aim for I ran the algorithm but only used the rule based approach, this gave me an average score of around 14 per game. For all of our experiments we need for the AI to be able to get more than this to say we have been successful.
 
-#### Experiment 1
+### Experiment 1
 
 My initial runs weren't very successful and resulted in an average fitness of around 2-3 with a best fitness of 4, nowhere near our target of 14. After analysis of the code and reviewing the actions the network was taking I found the following problems
 
@@ -276,7 +276,7 @@ To try and stop the network from selecting options that weren't valid I changed 
 
 $$\frac{\sum{({score}+{number\ of\ invalid\ choices} \times -0.5)}}{number\ of\ iterations}$$
 
-#### Experiment 2
+### Experiment 2
 
 After updating the encoding and reward function I was able to be a bit more successful. The network was now quickly learning not to play impossible card combinations and was eventually able to have an average score of 3 and with a best network value of 7. Not a huge improvement unfortunately.
 
@@ -289,19 +289,19 @@ I then tried the following amendments to the reward functions:
 
 These changes resulted in a slight increase in the average score to 7 but still didn't give me the changes I needed.
 
-#### Experiment 3
+### Experiment 3
 
 It seems that the network was still being conservative and was drawing cards when it shouldn't be. A measure of success of playing in Dragonwood is the amount of points you get per card. The more cards you discard the less chance to get points you have. As a final attempt to get a less conservative AI agent I changed the function to try and incorporate this.
 
 Unfortunately this had the opposite effect and after a few generations the network was only drawing cards and doing nothing else.
 
-#### Experiment 4
+### Experiment 4
 
  I was starting to think that the state encoding was too complicated to allow the network to learn from. Before going back to the drawing board I decided to only provide attack options to the network that were possible. This does go against our stretch goal of trying to let the network learn the game rules but at this point I felt it was a good compromise to make.
 
  Once this had been implemented the network did converge on an answer much quicker and I saw a slight increase in the best performing network. However the best score of 8 was still pretty far from the value needed.
 
-#### Experiment 5
+### Experiment 5
 
 At this point i had been working on getting the network right for a month and had changed quite a few variables with minimal change in the resultant reward function. I felt therefore it was time to review the input encoding. Simplification of the encoding would mean that more of the games logic would be abstracted away from the network but the current approach was not yielding results.
 
@@ -323,7 +323,7 @@ This encoding reduces the number of input nodes from 86 to 11.
 
 When the process is running it can take hours to complete so I usually ran it in the evening or over the weekend. So I started it running on a Friday evening and went to bed.
 
-#### Success
+### Success
 
 So after over 300 generations I ended up with a network with a score of 16.6885. I now have a network that could compete with, and hopefully beat, my rule based algorithm. 
 
@@ -372,7 +372,7 @@ This broadly aligns with my initial intuition on how to select a card. It should
 
 I think the slight advantage that Alice had over the rule based agents was probably down to the network calculating a slightly better formula for prioritising when to attack.
 
-#### Results
+## Results
 
 Before we get to the results in detail, I think the huge changes gained by the encoding change in Experiment 5 warrant a little bit of discussion. This really proves how important the input encoding is and how it must include only relevant information. In my first attempt at an encoding I was providing the network with a lot of information, some of which wasn't useful to learn from. For example, I was providing the cards in the player's hand as well as the card in the attack option. We now know the important information was actually the number of cards attacking and the score to beat. This meant the network was not able to deduce this information from the encoding and so was strggling to learn. There was also a lot of other information which was confusing the network that was laregly unrelated to selecting a card.
 
@@ -387,7 +387,7 @@ Given the above have I been successful? Well, if I refer back to my initial goal
 
 I would say I have achieved the first 3 goals and while I didn't get any specific strategies to use from the AI, it did effectively confirm that the rule based approach gives a very good strategy to use against my kids and the AI generated network provides a 7% improvement over the rule based algorithm I generated.
 
-#### Next Steps and wider applicability
+### Next Steps and wider applicability
 
 There are a number of simplifying assumptions I've made and some limitations to my approach that do have an impact on strategy. To develop this further and to make a more relevant AI I could change the following:
 
@@ -401,7 +401,7 @@ This process and associated techniques are applicable in multiple disparate doma
 
 For example if a digital twin exists of a system and maintenance actions and their impact and cost could be quantified then these processes could be used to minimise the maintenance cost of a system or to maximise availability.
 
-#### Final summary
+## Final summary
 
 Overall it has been a really interesting and rewarding process and I have learnt a lot about Reinforcement Learning, Neural Networks and how to model systems in using Object Oriented programming in Python. However, by the time I have got to a point where I could apply the strategies  I had leant my kids had moved on and dont want to play Dragonwood anymore. 
 
@@ -413,7 +413,7 @@ The three lessons I have learnt from the process are:
 
 - Be quicker as children get bored easily.
 
-#### References
+## References
 
 If you're interested in reading more about NEAT with more detail on how reproduction and mutation work then I would recommend reading the [original paper.](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf)
 
